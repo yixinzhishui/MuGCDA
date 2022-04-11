@@ -1,0 +1,93 @@
+CURRENT_GPU: 0
+DATASET:
+    NAME: "gdal_landcover_common"
+    ROOT_PATH: /data/open_datasets/rsipac #/data/datasets/GID_RGB_15_1024x1024 #J:\Expert_Datasets\GreenLand_3band_512x512_2numclass
+    MEAN: [0.2929289, 0.26457465, 0.20767461] # [0.3539229, 0.3734769, 0.34095916]  #  [0.5, 0.5, 0.5]
+    STD:  [0.09196425, 0.09383065, 0.10830729] # [0.23289922, 0.22774169, 0.22549641] #     #[0.5, 0.5, 0.5]
+    NUM_CHANNELS: 3
+    NUM_CLASSES: 9
+    CLASS_INDEX: [0, 1, 2, 3, 4, 5, 6, 7, 8]   #[0, 255]
+    IGNORE_INDEX: -1
+TRAIN:
+    EPOCHS: 200
+    CROP_SIZE: 512 #(512, 512)
+    BATCH_SIZE: 8
+    GRAD_STEPS: 2
+    DATA_LIST: #/data/open_datasets/rsipac_20000/train/trainRsipac_label.p
+    BACKBONE_PRETRAINED_PATH: /dataset/data/pretrained_models/hrnetv2_w32_imagenet_pretrained.pth #/code/python/pytorch/pytorchAI_segmentation_GID/pretrain_pth/hrnet-w18-small-v1-08f8ae64.pth #/data/code/pytorchAI_segmentation/pretrain_pth/efficientnet-b3-5fb5a3c3.pth #/data/code/pytorchAI_segmentation/pretrain_pth/efficientnet-b3-5fb5a3c3.pth
+    PRETRAINED_MODEL_PATH:
+    AMP: True
+VAL:
+    BATCH_SIZE: 12
+    CROP_SIZE: 512 #512 #(512, 512)
+    DATA_LIST: #/data/open_datasets/GID_RGB_15_512x512_0overlap_sub/train/GID15_train_list_subset_balance.txt
+TEST:
+    BATCH_SIZE: 8
+    CROP_SIZE: #512 #(512, 512)
+    TEST_MODEL_PATH: #/code/python/pytorch/runs/checkpoints/Unet_efficientnet-b3_gdal_landcover_2021-07-14-08-29/15_0.50232_checkpoint.pth.tar #../trained_models/hrnet_w18_small_v1_cityscapes_cls19_1024x2048_trainset_segmentron.pth
+
+SOLVER:
+    OPTIMIZER: "sgd"
+    LR_SCHEDULER: poly #cosine
+    LR: 0.01
+    LOSS_NAME: ce_loss #imagebase_CEloss #focal_diceloss #"pixelcontrast"
+MODEL:
+    SOURCE: #"smp"
+    MODEL_NAME: "HRNet_OCR" #"HRNet" #"Unet"
+    BACKBONE: "hrnet_w32" #"efficientnet-b7"
+    ACTIVATION: #"sigmoid"
+    HRNET:
+        FINAL_CONV_KERNEL: 1
+        STAGE1:
+            NUM_MODULES: 1
+            NUM_BRANCHES: 1
+            BLOCK: BOTTLENECK
+            NUM_BLOCKS:
+                - 4
+            NUM_CHANNELS:
+                - 64
+            FUSE_METHOD: SUM
+        STAGE2:
+            NUM_MODULES: 1
+            NUM_BRANCHES: 2
+            BLOCK: BASIC
+            NUM_BLOCKS:
+                - 4
+                - 4
+            NUM_CHANNELS:
+                - 32
+                - 64
+            FUSE_METHOD: SUM
+        STAGE3:
+            NUM_MODULES: 4
+            NUM_BRANCHES: 3
+            BLOCK: BASIC
+            NUM_BLOCKS:
+                - 4
+                - 4
+                - 4
+            NUM_CHANNELS:
+                - 32
+                - 64
+                - 128
+            FUSE_METHOD: SUM
+        STAGE4:
+            NUM_MODULES: 3
+            NUM_BRANCHES: 4
+            BLOCK: BASIC
+            NUM_BLOCKS:
+                - 4
+                - 4
+                - 4
+                - 4
+            NUM_CHANNELS:
+                - 32
+                - 64
+                - 128
+                - 256
+            FUSE_METHOD: SUM
+
+VISUAL:
+    LOG_SAVE_DIR: /dataset/rsipac_runs/logs #/code/python/pytorch/runs/logs
+    MODEL_SAVE_DIR: /dataset/rsipac_runs/checkpoints #/code/python/pytorch/runs/checkpoints
+    OUTPUT_DIR: /dataset/rsipac_runs/semi_stage/visual

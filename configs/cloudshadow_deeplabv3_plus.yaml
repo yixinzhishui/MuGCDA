@@ -1,0 +1,24 @@
+DATASET:
+    NAME: "cloudshadow"
+    MEAN: [0.5, 0.5, 0.5]
+    STD: [0.5, 0.5, 0.5]
+TRAIN:
+    BACKBONE_PRETRAINED_PATH: /data/Landcover/pretrain_pth/tf-xception65-270e81cf.pth
+    PRETRAINED_MODEL_PATH:
+    MODEL_SAVE_DIR: tools/runs/checkpoints/
+    LOG_SAVE_DIR: tools/runs/logs
+    EPOCHS: 400
+    BATCH_SIZE: 4
+    CROP_SIZE: 512
+TEST:
+    BATCH_SIZE: 2
+    #CROP_SIZE: (1025, 2049)
+    TEST_MODEL_PATH: E:\data\projects_and_topic\CloudShadow_detection\runs\checkpoints\DeepLabV3_Plus_xception65_cloudshadow_2021-01-29-13-12\best_checkpoint.pth.tar                      #trained_models/deeplabv3_plus_xception_segmentron.pth
+
+SOLVER:
+    LR: 0.02
+
+MODEL:
+    MODEL_NAME: "DeepLabV3_Plus"
+    BACKBONE: "xception65"
+    BN_EPS_FOR_ENCODER: 1e-3

@@ -1,0 +1,52 @@
+CURRENT_GPU: 0
+DATASET:
+    NAME: "gdal_landcover_common"
+    ROOT_PATH: /data/open_datasets/rsipac_semi_20000 #/data/datasets/GID_RGB_15_1024x1024 #J:\Expert_Datasets\GreenLand_3band_512x512_2numclass
+    MEAN: [0.29310304, 0.2636692, 0.20883968]  #[0.5, 0.5, 0.5]
+    STD:  [0.09101917, 0.09300123, 0.106814794]       #[0.5, 0.5, 0.5]
+    NUM_CHANNELS: 3
+    NUM_CLASSES: 47
+    CLASS_INDEX: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+                  10,11,12,13,14,15,16,17,18,19,
+                  20,21,22,23,24,25,26,27,28,29,
+                  30,31,32,33,34,35,36,37,38,39,
+                  40,41,42,43,44,45,46]   #[0, 255]
+    IGNORE_INDEX: -1
+TRAIN:
+    EPOCHS: 200
+    CROP_SIZE: 512 #(512, 512)
+    BATCH_SIZE: 18
+    GRAD_STEPS: 1
+    DATA_LIST: #/data/open_datasets/rsipac_20000/train/trainRsipac_label.p
+    BACKBONE_PRETRAINED_PATH: /dataset/data/pretrained_models/mit_b2.pth #/data/code/pytorchAI_segmentation/pretrain_pth/efficientnet-b3-5fb5a3c3.pth #/data/code/pytorchAI_segmentation/pretrain_pth/efficientnet-b3-5fb5a3c3.pth
+    PRETRAINED_MODEL_PATH: #/code/python/pytorch/runs/checkpoints/Unet_efficientnet-b3_gdal_landcover_2021-07-12-13-52/best_checkpoint.pth.tar
+    AMP: True
+VAL:
+    BATCH_SIZE: 18
+    CROP_SIZE: 512 #512 #(512, 512)
+    DATA_LIST: #/data/open_datasets/GID_RGB_15_512x512_0overlap_sub/train/GID15_train_list_subset_balance.txt
+TEST:
+    BATCH_SIZE: 10
+    CROP_SIZE: #512 #(512, 512)
+    TEST_MODEL_PATH: #/dataset/rsipac_runs/checkpoints/SegFormer_OCR_mit_b3_gdal_landcover_common_2021-09-23-04-28/best_checkpoint.pth.tar #/dataset/rsipac_runs/checkpoints/SegFormer_mit_b3_gdal_landcover_common_2021-09-21-03-01/82_0.65691_checkpoint.pth.tar #/code/python/pytorch/runs/checkpoints/SegFormer_mit_b3_gdal_landcover_common_2021-09-16-13-20/99_0.66323_checkpoint.pth.tar #/data_zs/code/checkpoints/Unet_efficientnet-b3_gdal_landcover_2021-07-12-13-52/best_checkpoint.pth.tar #../trained_models/hrnet_w18_small_v1_cityscapes_cls19_1024x2048_trainset_segmentron.pth
+
+SOLVER:
+    OPTIMIZER: "poly_adamw"
+    LR_SCHEDULER: poly #cosine
+    LR: 6e-5
+    LOSS_NAME: ce_loss #imagebase_CEloss #focal_diceloss #"pixelcontrast"
+MODEL:
+    SOURCE: #"smp"
+    MODEL_NAME: "SegFormer_OCR" #"Unet"
+    BACKBONE: "mit_b2" #"efficientnet-b3"
+    ACTIVATION: #"sigmoid"
+
+VISUAL:
+    LOG_SAVE_DIR: /dataset/rsipac_runs/semi_stage/logs #/code/python/pytorch/runs/logs
+    MODEL_SAVE_DIR: /dataset/rsipac_runs/semi_stage/checkpoints #/code/python/pytorch/runs/checkpoints
+    OUTPUT_DIR: /dataset/rsipac_runs/semi_stage/visual
+
+UTILS:
+    VAL_START: 50
+    EPOCH_STOP: 90
+

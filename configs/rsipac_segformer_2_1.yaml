@@ -1,0 +1,56 @@
+CURRENT_GPU: 0
+TRAIN_STEP_ADD: False
+DATASET:
+    NAME: "gdal_landcover_common"
+    ROOT_PATH: /dataset #/data/open_datasets/rsipac_semi_20000 #/data/open_datasets/rsipac_semi_full #/data/open_datasets/rsipac_semi_20000  #/data/open_datasets/rsipac_20000 #/data/datasets/GID_RGB_15_1024x1024 #J:\Expert_Datasets\GreenLand_3band_512x512_2numclass
+    MEAN: [0.29310304, 0.2636692, 0.20883968] #[0.29310304, 0.2636692, 0.20883968, 0.39742813]  #[0.5, 0.5, 0.5]
+    STD:  [0.09101917, 0.09300123, 0.106814794] #[0.09101917, 0.09300123, 0.106814794, 0.1142725]       #[0.5, 0.5, 0.5]
+    NUM_CHANNELS: 3 #4
+    NUM_CLASSES: 47
+    CLASS_INDEX: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+                  10,11,12,13,14,15,16,17,18,19,
+                  20,21,22,23,24,25,26,27,28,29,
+                  30,31,32,33,34,35,36,37,38,39,
+                  40,41,42,43,44,45,46]   #[0, 255]
+    IGNORE_INDEX: -1
+
+TRAIN:
+    EPOCHS: 200
+    CROP_SIZE: 512 #(512, 512)
+    BATCH_SIZE: 16
+    GRAD_STEPS: 1
+    MODEL_SCALE: 1
+    DATA_LIST: /workspace/dataset/rsipac_semi_20000_train_list_v2.txt #/data/open_datasets/rsipac_semi_20000/train/trainRsipac_semi_label.p #/dataset/config/rsipac/select13965_from_rsipac_semi_full_35000_class_balance.txt #/data/open_datasets/rsipac_20000/train/trainRsipac_label.p
+    BACKBONE_PRETRAINED_PATH: /workspace/pretrain_pth/mit_b3.pth #/data/code/pytorchAI_segmentation/pretrain_pth/efficientnet-b3-5fb5a3c3.pth #/data/code/pytorchAI_segmentation/pretrain_pth/efficientnet-b3-5fb5a3c3.pth
+    PRETRAINED_MODEL_PATH: #/workspace/runs/66_0.38098_checkpoint.pth.tar #/workspace/runs/88_0.37473_checkpoint.pth.tar #/dataset/rsipac_runs/semi_stage/checkpoints/SegFormer_mit_b3_gdal_landcover_common_2021-10-25-08-51/best_checkpoint.pth.tar
+    AMP: True
+VAL:
+    BATCH_SIZE: 16
+    CROP_SIZE: 512 #512 #(512, 512)
+    DATA_LIST: /workspace/dataset/rsipac_semi_20000_val_list_v2.txt #/dataset/config/rsipac/select5985_val_from_rsipac_semi_full_35000_remain_random.txt #/data/open_datasets/GID_RGB_15_512x512_0overlap_sub/train/GID15_train_list_subset_balance.txt
+TEST:
+    BATCH_SIZE: 12
+    CROP_SIZE: #512 #(512, 512)
+    TEST_MODEL_PATH: #/workspace/runs/best_checkpoint.pth.tar #/dataset/rsipac_runs/checkpoints/SegFormer_mit_b1_gdal_landcover_common_2021-10-17-13-00/best_checkpoint.pth.tar #/dataset/rsipac_runs/checkpoints/SegFormer_mit_b5_gdal_landcover_common_2021-10-06-08-00/best_checkpoint.pth.tar #/dataset/rsipac_runs/checkpoints/best_0.66343_68.11_checkpoint.pth.tar #/dataset/rsipac_runs/checkpoints/SegFormer_mit_b3_gdal_landcover_common_2021-10-03-14-14/best_checkpoint.pth.tar #/dataset/rsipac_runs/checkpoints/SegFormer_mit_b3_gdal_landcover_common_2021-10-02-11-41/98_0.66089_checkpoint.pth.tar #/dataset/rsipac_runs/checkpoints/SegFormer_mit_b3_gdal_landcover_common_2021-09-28-01-30/59_0.66541_checkpoint.pth.tar #/dataset/rsipac_runs/checkpoints/SegFormer_mit_b3_gdal_landcover_common_2021-09-25-11-32/120_0.66107_checkpoint.pth.tar
+    USE_TTA: False
+
+SOLVER:
+    OPTIMIZER: "poly_adamw"
+    LR_SCHEDULER: poly #cosine
+    LR: 6e-5
+    LOSS_NAME: ce_loss #ohem_ce_loss_v2 #ce_focal_diceloss #ce_focal_diceloss #ce_focalloss #dice_sce_contrast_loss #ce_loss #imagebase_CEloss #focal_diceloss #"pixelcontrast"
+
+MODEL:
+    SOURCE: #"smp"
+    MODEL_NAME: "SegFormer" #"Unet"
+    BACKBONE: "mit_b3" #"efficientnet-b3"
+    ACTIVATION: #"sigmoid"
+
+VISUAL:
+    LOG_SAVE_DIR: /workspace/runs/logs #/code/python/pytorch/runs/logs
+    MODEL_SAVE_DIR: /workspace/runs/checkpoint_2_1 #/dataset/rsipac_runs/semi_stage/checkpoints #/code/python/pytorch/runs/checkpoints
+    OUTPUT_DIR: /workspace/runs/visual
+
+UTILS:
+    VAL_START: 60
+    EPOCH_STOP: 70
