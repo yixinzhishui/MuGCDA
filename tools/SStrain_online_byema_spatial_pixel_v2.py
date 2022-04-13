@@ -274,7 +274,7 @@ class Trainer(object):
             outputs_sample_stu = torch.softmax(outputs_pesudo['out'], dim=1).mean(dim=2).mean(dim=2)
             loss_sample = self.criterion_sample(outputs_sample_stu, outputs_sample_tea)
 
-            losses_pesudo = loss_pixel * 0.6 + loss_pixel_aux * 0.3 + loss_sample * 0.1
+            losses_pesudo = loss_pixel * 0.45 + loss_pixel_aux * 0.45 + loss_sample * 0.1
             losses_pesudo.backward()
 
             loss_dict_pixel_reduced = reduce_loss_dict(dict(loss=loss_pixel))
@@ -301,8 +301,8 @@ class Trainer(object):
                         epoch, epochs, iteration % iters_per_epoch, iters_per_epoch,
                         self.optimizer.param_groups[0]['lr'],
                         losses_reduced.item(),
-                        losses_pixel_reduced.item() * 0.6,
-                        losses_pixel_aux_reduced.item() * 0.4,
+                        losses_pixel_reduced.item() * 0.45,
+                        losses_pixel_aux_reduced.item() * 0.45,
                         losses_sample_reduced.item() * 0.1,
                         # losses_mix_reduced.item()
                         str(datetime.timedelta(seconds=int(time.time() - start_time))),
