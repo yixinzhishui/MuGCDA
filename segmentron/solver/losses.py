@@ -412,6 +412,20 @@ class CrossEntropyLoss(nn.Module):
             **kwargs)
         return loss_cls
 
+def kd_loss(logits_student, logits_teacher):
+    log_pred_stu = F.log_softmax(logits_student, dim=1)
+    pred_tea = F.softmax(logits_teacher, dim=1)
+    loss_kd = F.kl_div(log_pred_stu, pred_tea, reduction='none').sum(1).mean()
+
+    return loss_kd
+
+# def kd_loss(logits_student, logits_teacher):
+#     log_pred_stu = torch.log(logits_student, dim=1)
+#     pred_tea = F.softmax(logits_teacher, dim=1)
+#     loss_kd = F.kl_div(logits_teacher, log_pred_stu, reduction='none').sum(1).mean()
+#
+#     return loss_kd
+
 def get_segmentation_losses(loss_name, **kwargs):
     #if cfg.SOLVER.LOSS_NAME == "ce_pseudo":
     # return CrossEntroy2d(**kwargs)

@@ -11,7 +11,8 @@ import csv
 
 cur_path = os.path.abspath(os.path.dirname(__file__))  # https://www.cnblogs.com/joldy/p/6144813.html
 root_path = os.path.split(cur_path)[0]
-sys.path.append(root_path)  # sys.path.append:https://blog.csdn.net/zxyhhjs2017/article/details/80582246?utm_medium=distribute.pc_relevant.none-task-blog-title-3&spm=1001.2101.3001.4242
+sys.path.append(
+    root_path)  # sys.path.append:https://blog.csdn.net/zxyhhjs2017/article/details/80582246?utm_medium=distribute.pc_relevant.none-task-blog-title-3&spm=1001.2101.3001.4242
 
 import logging
 import torch
@@ -20,14 +21,15 @@ import numpy as np
 import torch.utils.data as data
 import torch.nn.functional as F
 from matplotlib import pyplot as plt
-from torch.cuda.amp import autocast   #https://zhuanlan.zhihu.com/p/165152789
+from torch.cuda.amp import autocast  # https://zhuanlan.zhihu.com/p/165152789
 from torch.cuda.amp import GradScaler
 
 from torchvision import transforms
 from segmentron.data.dataloader import get_segmentation_dataset
-from segmentron.models.model_zoo import get_segmentation_model, load_model_resume, SegmentationScale, update_ema, update_sample_ema
+from segmentron.models.model_zoo import get_segmentation_model, load_model_resume, SegmentationScale, update_ema, \
+    update_sample_ema
 from segmentron.solver.loss import get_segmentation_loss
-from segmentron.solver.losses import get_segmentation_losses
+from segmentron.solver.losses import get_segmentation_losses, kd_loss
 from segmentron.solver.optimizer import get_optimizer
 from segmentron.solver.lr_scheduler import get_scheduler
 from segmentron.utils.distributed import *
@@ -39,8 +41,9 @@ from segmentron.utils.visualize import show_flops_params
 from segmentron.config import cfg
 
 from segmentron.utils.dacs_transforms import (denorm, get_class_masks,
-                                                get_mean_std, strong_transform, one_mix)
+                                              get_mean_std, strong_transform, one_mix)
 from segmentron.utils.visualize import subplotimg
+
 
 class Trainer(object):
     def __init__(self, args):
@@ -110,14 +113,18 @@ class Trainer(object):
         # self.SummaryWriter = SummaryWriter(log_dir=cfg.VISUAL.LOG_SAVE_DIR + time.strftime("%Y-%m-%dT%H-%M-%S", time.localtime()), comment=cfg.TRAIN.SUMMARYWRITER_COMMENT)
         os.makedirs(os.path.join(cfg.VISUAL.LOG_SAVE_DIR, 'train_log'), exist_ok=True)
         os.makedirs(os.path.join(cfg.VISUAL.LOG_SAVE_DIR, 'valid_log'), exist_ok=True)
-        with open(os.path.join(cfg.VISUAL.LOG_SAVE_DIR, 'train_log', 'train_log_{}.csv'.format(cfg.VISUAL.CURRENT_NAME)), 'w',
-                      newline='') as f:
-                csv_writer = csv.writer(f)
-                csv_writer.writerow(['Epoch', 'Iters', 'Loss', 'lr'])
-        with open(os.path.join(cfg.VISUAL.LOG_SAVE_DIR, 'valid_log', 'valid_log_{}.csv'.format(cfg.VISUAL.CURRENT_NAME)), 'w',
-                      newline='') as f:
-                csv_writer = csv.writer(f)
-                csv_writer.writerow(['Epoch', 'pixAcc', 'mIoU'])
+        with open(
+                os.path.join(cfg.VISUAL.LOG_SAVE_DIR, 'train_log', 'train_log_{}.csv'.format(cfg.VISUAL.CURRENT_NAME)),
+                'w',
+                newline='') as f:
+            csv_writer = csv.writer(f)
+            csv_writer.writerow(['Epoch', 'Iters', 'Loss', 'lr'])
+        with open(
+                os.path.join(cfg.VISUAL.LOG_SAVE_DIR, 'valid_log', 'valid_log_{}.csv'.format(cfg.VISUAL.CURRENT_NAME)),
+                'w',
+                newline='') as f:
+            csv_writer = csv.writer(f)
+            csv_writer.writerow(['Epoch', 'pixAcc', 'mIoU'])
 
         # create network
         self.model = get_segmentation_model().to(self.device)
@@ -135,7 +142,8 @@ class Trainer(object):
         if cfg.MODEL.BN_TYPE not in ['BN']:
             logging.info('Batch norm type is {}, convert_sync_batchnorm is not effective'.format(cfg.MODEL.BN_TYPE))
         elif args.distributed and cfg.TRAIN.SYNC_BATCH_NORM:
-            self.model = nn.SyncBatchNorm.convert_sync_batchnorm(self.model)  # https://pytorch.org/docs/master/generated/torch.nn.SyncBatchNorm.html
+            self.model = nn.SyncBatchNorm.convert_sync_batchnorm(
+                self.model)  # https://pytorch.org/docs/master/generated/torch.nn.SyncBatchNorm.html
             self.ema_model = nn.SyncBatchNorm.convert_sync_batchnorm(self.ema_model)
             """
              同步批处理标准PyTorch
@@ -155,7 +163,7 @@ class Trainer(object):
         #                                        ignore_index=cfg.DATASET.IGNORE_INDEX).to(self.device)
 
         self.criterion = get_segmentation_loss(cfg.MODEL.MODEL_NAME, use_ohem=cfg.SOLVER.OHEM).to(self.device)
-        #self.criterion_pesudo = get_segmentation_loss(cfg.MODEL.MODEL_NAME, use_ohem=cfg.SOLVER.OHEM, ignore_index=255).to(self.device)
+        # self.criterion_pesudo = get_segmentation_loss(cfg.MODEL.MODEL_NAME, use_ohem=cfg.SOLVER.OHEM, ignore_index=255).to(self.device)
         self.criterion_pesudo = get_segmentation_losses('ce_loss_weight').to(self.device)
         self.criterion_sample = get_segmentation_losses('rkd_loss').to(self.device)
         # optimizer, for model just includes encoder, decoder(head and auxlayer).
@@ -183,7 +191,6 @@ class Trainer(object):
             cfg.__setattr__("UTILS.EPOCH_STOP", self.start_epoch + 7)
         print("--------------------------epoch stop:{}".format(cfg.UTILS.EPOCH_STOP))
 
-
         if args.distributed:  # 使用PyTorch编写分布式应用程序：https://github.com/apachecn/pytorch-doc-zh/blob/master/docs/1.0/dist_tuto.md     #https://oldpan.me/archives/pytorch-to-use-multiple-gpus   #https://zhuanlan.zhihu.com/p/76638962?utm_source=wechat_session
             self.model = nn.parallel.DistributedDataParallel(self.model, device_ids=[args.local_rank],
                                                              output_device=args.local_rank,
@@ -202,7 +209,7 @@ class Trainer(object):
         logging.info('Start training, Total Epochs: {:d} = Total Iterations {:d}'.format(epochs, max_iters))
 
         self.model.train()
-        #iteration = self.start_epoch * iters_per_epoch if self.start_epoch > 0 else 0
+        # iteration = self.start_epoch * iters_per_epoch if self.start_epoch > 0 else 0
 
         train_source_loader_iter = iter(self.train_source_loader)
         train_target_loader_iter = iter(self.train_target_loader)
@@ -232,7 +239,8 @@ class Trainer(object):
             # reduce losses over all GPUs for logging purposes
             loss_dict_reduced = reduce_loss_dict(loss_dict)
             # loss_dict_reduced_pesudo = reduce_loss_dict(loss_dict_pesudo)
-            losses_reduced = sum(loss for loss in loss_dict_reduced.values())  # + sum(loss for loss in loss_dict_reduced_pesudo.values())
+            losses_reduced = sum(loss for loss in
+                                 loss_dict_reduced.values())  # + sum(loss for loss in loss_dict_reduced_pesudo.values())
             losses.backward()
 
             # outputs_sample = outputs.detach()
@@ -249,12 +257,15 @@ class Trainer(object):
             ps_size = np.size(np.array(pseudo_label.cpu()))
             # print("------------ps_size", ps_size)
             pseudo_weight = torch.sum(ps_large_p).item() / ps_size
-            pseudo_weight = pseudo_weight * torch.ones(pseudo_prob.shape, device=self.device) # torch.ones(pseudo_prob.shape, device=self.device) #pseudo_weight * torch.ones(pseudo_prob.shape, device=self.device)
+            pseudo_weight = pseudo_weight * torch.ones(pseudo_prob.shape,
+                                                       device=self.device)  # torch.ones(pseudo_prob.shape, device=self.device) #pseudo_weight * torch.ones(pseudo_prob.shape, device=self.device)
             pseudo_weight[ps_large_p != 1] = 0
 
             outputs_sample = self.ema_model(images)
             outputs_sample = outputs_sample.detach()
             outputs_sample_tea = torch.softmax(outputs_sample, dim=1).mean(dim=2).mean(dim=2)
+            outputs_class_tea = self.calculate_mean_vector_class(outputs_sample)
+            # print('-------------------------:{}'.format(outputs_class_tea.shape))
 
             # print("------------ps_large_p", torch.sum(ps_large_p != 1))
             outputs_pesudo = self.model(images_pesudo)
@@ -263,14 +274,20 @@ class Trainer(object):
             outputs_sample_stu = torch.softmax(outputs_pesudo, dim=1).mean(dim=2).mean(dim=2)
             loss_sample = self.criterion_sample(outputs_sample_stu, outputs_sample_tea)
 
-            losses_pesudo = loss_pixel * 0.9 + loss_sample * 0.1
+            outputs_class_stu = self.calculate_mean_vector_class(outputs_pesudo)
+            # print('-------outputs_class_stu:{}'.format(outputs_class_stu))
+            # print('-------outputs_class_tea:{}'.format(outputs_class_tea))
+            loss_class = kd_loss(outputs_class_stu, outputs_class_tea)
+
+            losses_pesudo = loss_pixel * 0.8 + loss_sample * 0.1 + loss_class * 0.1
             losses_pesudo.backward()
 
             loss_dict_pixel_reduced = reduce_loss_dict(dict(loss=loss_pixel))
             losses_pixel_reduced = sum(loss for loss in loss_dict_pixel_reduced.values())
             loss_dict_sample_reduced = reduce_loss_dict(dict(loss=loss_sample))
             losses_sample_reduced = sum(loss for loss in loss_dict_sample_reduced.values())
-
+            loss_dict_class_reduced = reduce_loss_dict(dict(loss=loss_class))
+            losses_class_reduced = sum(loss for loss in loss_dict_class_reduced.values())
             # self.optimizer.zero_grad()
             # losses.backward()
             self.optimizer.step()
@@ -284,13 +301,19 @@ class Trainer(object):
             if iteration % log_per_iters == 0 and self.save_to_disk:
                 logging.info(
                     "Epoch: {:d}/{:d} || Iters: {:d}/{:d} || Lr: {:.6f} || "
-                    "Loss Source: {:.4f} || Loss Mix: {:.4f} || Loss Sample: {:.4f} || Cost Time: {} || Estimated Time: {}".format(
-                        epoch, epochs, iteration % iters_per_epoch, iters_per_epoch,
-                        self.optimizer.param_groups[0]['lr'], losses_reduced.item(), losses_pixel_reduced.item() * 0.9, losses_sample_reduced.item() * 0.1,
+                    "Loss Source: {:.4f} || Loss Mix: {:.4f} || Loss Sample: {:.4f} || Loss Class: {:.4f} || Cost Time: {} || Estimated Time: {}".format(
+                        epoch, epochs,
+                        iteration % iters_per_epoch, iters_per_epoch,
+                        self.optimizer.param_groups[0]['lr'],
+                        losses_reduced.item(),
+                        losses_pixel_reduced.item() * 0.8,
+                        losses_sample_reduced.item() * 0.1,
+                        losses_class_reduced.item() * 0.1,
                         # losses_mix_reduced.item()
                         str(datetime.timedelta(seconds=int(time.time() - start_time))),
                         eta_string))  # losses_reduced.item()
-                with open(os.path.join(cfg.VISUAL.LOG_SAVE_DIR, 'train_log', 'train_log_{}.csv'.format(cfg.VISUAL.CURRENT_NAME)),
+                with open(os.path.join(cfg.VISUAL.LOG_SAVE_DIR, 'train_log',
+                                       'train_log_{}.csv'.format(cfg.VISUAL.CURRENT_NAME)),
                           'a', newline='') as f:
                     csv_writer = csv.writer(f)
                     csv_writer.writerow([epoch, iteration, losses_reduced.item(),
@@ -380,6 +403,35 @@ class Trainer(object):
         logging.info(
             "Total training time: {} ({:.4f}s / it)".format(
                 total_training_str, total_training_time / max_iters))
+
+    def process_label(self, label):
+        batch, channel, w, h = label.size()
+        pred1 = torch.zeros(batch, cfg.DATASET.NUM_CLASSES + 1, w, h).to(self.device)
+        id = torch.where(label < cfg.DATASET.NUM_CLASSES, label, torch.Tensor([cfg.DATASET.NUM_CLASSES]).to(self.device))
+        pred1 = pred1.scatter_(1, id.long(), 1)
+        return pred1
+
+    def calculate_mean_vector_class(self, outputs):
+        outputs_softmax = F.softmax(outputs, dim=1)
+        outputs_argmax = outputs_softmax.argmax(dim=1, keepdim=True)
+        outputs_argmax = self.process_label(outputs_argmax.float())
+
+        outputs_class = []
+        for c in range(outputs.size()[1]):
+            vector_class = []
+            for n in range(outputs.size()[0]):
+                output_class = outputs[n] * outputs_argmax[n][c]
+                output_class = output_class.sum(dim=1).sum(dim=1) / (outputs_argmax[n][c].sum() + 1e-6)
+                vector_class.append(output_class)
+                # print('---------------:{}'.format(output_class.shape))
+            vector_class = torch.stack(vector_class, dim=0).mean(dim=0)
+            # print('---------------:{}'.format(vector_class.shape))
+            outputs_class.append(vector_class)
+        outputs_class = torch.stack(outputs_class, dim=0)
+
+        return outputs_class
+
+
 
     def validation(self, epoch, iteration):
 
