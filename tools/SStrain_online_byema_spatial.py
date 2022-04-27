@@ -313,7 +313,7 @@ class Trainer(object):
                 self.model.train()
             if iteration % 100 == 0:
                 out_dir = os.path.join(cfg.VISUAL.OUTPUT_DIR,
-                                       'class_mix_debug_online-ST-Spatial')
+                                       'class_mix_debug_online-ST-Spatial_0427')
                 os.makedirs(out_dir, exist_ok=True)
                 vis_img = torch.clamp(denorm(images, means, stds), 0, 1)
                 vis_trg_img = torch.clamp(denorm(images_pesudo, means, stds), 0, 1)
