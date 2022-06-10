@@ -48,6 +48,8 @@ def denorm_(img, mean, std):
 def renorm_(img, mean, std):
     img.sub_(mean).div_(std)   #.mul_(255.0)
 
+def renorm(img, mean, std):
+    return img.sub(mean).div(std)   #.mul_(255.0)
 
 def color_jitter(color_jitter, mean, std, data=None, target=None, s=0.25, p=0.2):
     # s is the strength of colorjitter
@@ -135,3 +137,62 @@ def one_mix(mask, data=None, target=None):
         target = (stackedMask0 * target[0] +
                   (1 - stackedMask0) * target[1]).unsqueeze(0)
     return data, target
+
+
+
+def low_freq_mutate( amp_src, amp_trg, L=0.1 ):
+    a_src = torch.fft.fftshift(amp_src, dim=(-2, -1))
+    a_trg = torch.fft.fftshift(amp_trg, dim=(-2, -1))
+
+    _, _, h, w = amp_src.size()
+    b = (np.floor(min(h, w)*L)).astype(int)     # get b
+
+    c_h = np.floor(h / 2.0).astype(int)
+    c_w = np.floor(w / 2.0).astype(int)
+
+    h1 = c_h - b
+    h2 = c_h + b + 1
+    w1 = c_w - b
+    w2 = c_w + b + 1
+
+    a_src[:, :, h1:h2, w1:w2] = a_trg[:, :, h1:h2, w1:w2]
+    a_src = torch.fft.ifftshift(a_src, dim=(-2, -1))
+    return a_src
+
+
+def FDA_source_to_target(src_img, trg_img, L=0.1, mean=None, std=None):
+    # exchange magnitude
+    # input: src_img, trg_img
+
+    L = random.uniform(0, L)
+    p = random.uniform(0, 1)
+
+    if p > 0.2:
+        return src_img
+
+    src_img = torch.clamp(denorm(src_img.clone(), mean, std), 0, 1) * 255.0
+    trg_img = torch.clamp(denorm(trg_img.clone(), mean, std), 0, 1) * 255.0
+    # get fft of both source and target
+    fft_src = torch.fft.fft2(src_img.clone(), dim=(-2, -1))   #UserWarning: The function torch.rfft is deprecated and will be removed in a future PyTorch release. Use the new torch.fft module functions, instead, by importing torch.fft and calling torch.fft.fft or torch.fft.rfft.
+    fft_trg = torch.fft.fft2(trg_img.clone(), dim=(-2, -1))   #UserWarning: The function torch.irfft is deprecated and will be removed in a future PyTorch release. Use the new torch.fft module functions, instead, by importing torch.fft and calling torch.fft.ifft or torch.fft.irfft
+
+    # extract amplitude and phase of both ffts
+    amp_src, pha_src = torch.abs(fft_src), torch.angle(fft_src)
+    amp_trg, pha_trg = torch.abs(fft_trg), torch.angle(fft_trg)
+
+    # replace the low frequency amplitude part of source with that from target
+    amp_src_ = low_freq_mutate(amp_src.clone(), amp_trg.clone(), L=L)
+
+    # recompose fft of source
+    fft_src_ = amp_src_ * torch.exp(1j * pha_src)
+
+    src_in_trg = torch.fft.ifft2(fft_src_, dim=(-2, -1))
+    # get the recomposed image: source content, target style
+    src_in_trg = torch.real(src_in_trg)
+
+    src_in_trg =torch.clip(src_in_trg, 0, 255) #torch.tensor(, dtype=torch.uint8)
+
+    src_in_trg = renorm(src_in_trg / 255.0, mean, std)
+
+    return src_in_trg
+

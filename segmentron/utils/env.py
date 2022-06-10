@@ -29,7 +29,7 @@ def seed_all_rng(seed=None):
     torch.set_rng_state(torch.manual_seed(seed).get_state())
     random.seed(seed)
 
-def set_random_seed(seed, deterministic=True):
+def set_random_seed(seed, deterministic=True):   #https://blog.csdn.net/yyywxk/article/details/121606566  https://blog.csdn.net/hyk_1996/article/details/84307108
     """Set random seed.
 
     Args:
@@ -39,12 +39,12 @@ def set_random_seed(seed, deterministic=True):
             to True and `torch.backends.cudnn.benchmark` to False.
             Default: False.
     """
-    random.seed(seed)
+    random.seed(seed)   #
     os.environ['PYTHONHASHSEED'] = str(seed)
     np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
+    torch.manual_seed(seed)   #cpu
+    torch.cuda.manual_seed(seed)   #gpu
+    torch.cuda.manual_seed_all(seed)   #all gpus
     if deterministic:
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False

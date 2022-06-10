@@ -10,7 +10,7 @@ from ..config import cfg
 __all__ = ['DeepLabV3Plus']
 
 
-@MODEL_REGISTRY.register(name='DeepLabV3_Plus')       #编译原理，打断点调试
+@MODEL_REGISTRY.register(name='DeepLabV3_Plus')       #编译原理，打断点调试  ##deeplab  v1 v2 v3 v3+概要：https://zhuanlan.zhihu.com/p/68531147
 class DeepLabV3Plus(SegBaseModel):
     r"""DeepLabV3Plus
     Reference:
@@ -43,7 +43,7 @@ class DeepLabV3Plus(SegBaseModel):
             auxout = self.auxlayer(c3)
             auxout = F.interpolate(auxout, size, mode='bilinear', align_corners=True)
             outputs.append(auxout)
-        return tuple(outputs)    #两个输出
+        return x #tuple(outputs)    #两个输出
 
 
 class _DeepLabHead(nn.Module):

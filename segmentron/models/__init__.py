@@ -33,6 +33,7 @@ from .segformer import SegFormer
 from .segformer_ocr_v2 import SegFormer_OCR
 from .daformer import DAFormer
 from .lawin_transformer import LawinFormer
+from .deeplabv2 import DeepLabV2
 
 
 

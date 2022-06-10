@@ -3,6 +3,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
 
 from collections import OrderedDict
 from segmentron.utils.registry import Registry
@@ -191,3 +192,4 @@ def update_sample_ema(data1, data2, iter, alpha=0.999):   ##net1:ema_model   net
         data1.data = alpha_teacher * data1.data + (1 - alpha_teacher) * data2.data
 
     return data1
+

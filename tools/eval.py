@@ -40,7 +40,9 @@ class Evaluator(object):
         ])
 
         # dataset and dataloader
-        val_dataset = get_segmentation_dataset(cfg.DATASET.NAME, data_list_root=cfg.VAL.DATA_LIST, split='val', mode='testval', transform=input_transform)
+        val_dataset = get_segmentation_dataset(cfg.VAL.DATASET_NAME,  #cfg.VAL.DATASET_NAME  cfg.DATASET.NAME
+                                               root=cfg.VAL.ROOT_PATH,
+                                               data_list_root=cfg.VAL.DATA_LIST, split='val', mode='testval', transform=input_transform)
         #val_dataset = get_segmentation_dataset(cfg.DATASET.NAME, data_list_root=cfg.DATASET.DATA_LIST, split='val', mode='testval', transform=input_transform)
         val_sampler = make_data_sampler(val_dataset, False, args.distributed)
         val_batch_sampler = make_batch_data_sampler(val_sampler, images_per_batch=cfg.TEST.BATCH_SIZE, drop_last=False)
@@ -50,7 +52,7 @@ class Evaluator(object):
                                           pin_memory=True)
         #self.classes = val_dataset.NUM_CLASS    #NUM_CLASS    val_dataset.classes
         #self.classes = ["湿地", "耕地", "种植园用地", "林地", "草地", "道路", "建筑物", "水体", "未利用地", "背景"]
-        self.classes = ["耕地", "林地", "草地", "水域", "城乡", "未利用地"]
+        self.classes = ["Impervious_surfaces", "Building", "Low_vegetation", "Tree", "Car", "Clutter_background"]
         # self.classes = ["background", "industrial land", "urban residential", "rural residential", "traffic land",
         #                 "paddy field", "irrigated land", "dry cropland", "garden plot", "arbor woodland", "shrub land",
         #                 "natural grassland", "artificial grassland", "river", "lake", "pond"]
@@ -137,9 +139,10 @@ class Evaluator(object):
             preds = output.cpu().data.numpy().astype(np.uint8)
             for index in range(preds.shape[0]):
                 mask = self.decode_segmap(preds[index])
+                print(filename[index])
                 # if not os.path.exists(os.path.join(self.output_dir, filename[index].split('/')[-2])):
                 #     os.makedirs(os.path.join(self.output_dir, filename[index].split('/')[-2]))
-                cv2.imwrite(os.path.join(self.output_dir, filename[index]), mask)   #.replace('.tif', '.png')   #, cv2.cvtColor(mask, cv2.COLOR_RGB2BGR)
+                cv2.imwrite(os.path.join(self.output_dir, os.path.basename(filename[index])), mask)   #.replace('.tif', '.png')   #, cv2.cvtColor(mask, cv2.COLOR_RGB2BGR)
             #mask = get_color_pallete(pred, cfg.DATASET.NAME)
             #outname = os.path.splitext(filename[-1])[0] + '.png'
             # mask = Image.fromarray(pred)
@@ -180,13 +183,21 @@ class Evaluator(object):
     def decode_segmap(self, mask):
 
         assert len(mask.shape) == 2, "the len of mask unexpect"
-        assert cfg.DATASET.NUM_CLASSES == len(cfg.DATASET.CLASS_INDEX[0]), "the value of NUM_CLASSES do not equal the len of CLASS_INDEX"
+
+        color_map = cfg.DATASET.CLASS_INDEX[0]
         height, width = mask.shape
 
-        decode_mask = np.zeros((height, width), dtype=np.uint)
+        # decode_mask = np.zeros((height, width), dtype=np.uint)
+        #
+        # for pixel_value, class_index in cfg.DATASET.CLASS_INDEX[0].items():  # range(self.config.num_classes):
+        #     decode_mask[mask == class_index] = pixel_value
 
-        for pixel_value, class_index in cfg.DATASET.CLASS_INDEX[0].items():  # range(self.config.num_classes):
-            decode_mask[mask == class_index] = pixel_value
+        decode_mask = np.zeros((height, width, 3), dtype=np.uint8)
+        for pixel, color in color_map.items():
+            if isinstance(color, list) and len(color) == 3:
+                decode_mask[np.where(mask == int(pixel))] = color
+            else:
+                print("unexpected format of color_map in the config json:{}".format(color))
 
         return decode_mask.astype(np.uint8)
 

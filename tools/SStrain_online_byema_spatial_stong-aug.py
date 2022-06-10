@@ -39,7 +39,7 @@ from segmentron.utils.visualize import show_flops_params
 from segmentron.config import cfg
 
 from segmentron.utils.dacs_transforms import (denorm, get_class_masks,
-                                                get_mean_std, strong_transform, one_mix)
+                                                get_mean_std, strong_transform, one_mix, FDA_source_to_target)
 from segmentron.utils.visualize import subplotimg
 
 class Trainer(object):
@@ -241,11 +241,14 @@ class Trainer(object):
 
             images_pesudo, _, _ = train_target_loader_iter.next()
             images_pesudo = images_pesudo.to(self.device)
-            outputs_pesudo_ema = self.ema_model(images_pesudo)
+
+            strong_images_pesudo = FDA_source_to_target(images_pesudo, images, 0.001, mean=means, std=stds)    #images_pesudo #
+            # print(strong_images_pesudo.shape)
+            outputs_pesudo_ema = self.ema_model(strong_images_pesudo)  #strong_images_pesudo  images_pesudo
 
             pesudo_softmax = torch.softmax(outputs_pesudo_ema.detach(), dim=1)
             pseudo_prob, pseudo_label = torch.max(pesudo_softmax, dim=1)
-            # ps_large_retain = pseudo_prob.ge(0.95).long() == 1
+            # ps_large_retain = pseudo_prob.ge(0.9).long() == 1
             ps_large_p = pseudo_prob.ge(0.5).long() == 1
             ps_size = np.size(np.array(pseudo_label.cpu()))
             # print("------------ps_size", ps_size)
@@ -254,7 +257,8 @@ class Trainer(object):
             pseudo_weight[ps_large_p != 1] = 0
             # pseudo_weight[ps_large_retain == 1] = 1
 
-            outputs_sample = self.ema_model(images)
+            strong_images = FDA_source_to_target(images, images_pesudo, 0.001, mean=means, std=stds)   #images #
+            outputs_sample = self.ema_model(strong_images)   #strong_images   images
             outputs_sample = outputs_sample.detach()
             outputs_sample_tea = torch.softmax(outputs_sample, dim=1).mean(dim=2).mean(dim=2)  #outputs_sample
             # outputs_sample_tea = update_sample_ema(outputs_sample_tea, outputs_sample, iteration)
@@ -313,10 +317,12 @@ class Trainer(object):
                 self.model.train()
             if iteration % 100 == 0:
                 out_dir = os.path.join(cfg.VISUAL.OUTPUT_DIR,
-                                       'class_mix_debug_online-ST-Spatial_debug0504')
+                                       'class_mix_debug_online-ST-Spatial_0503_strongaug_v3')
                 os.makedirs(out_dir, exist_ok=True)
                 vis_img = torch.clamp(denorm(images, means, stds), 0, 1)
                 vis_trg_img = torch.clamp(denorm(images_pesudo, means, stds), 0, 1)
+                # vis_strong_img = torch.clamp(denorm(strong_images, means, stds), 0, 1)
+                # vis_strong_trg_img = torch.clamp(denorm(strong_images_pesudo, means, stds), 0, 1)
                 # print('vis_img:{}'.format(vis_img.shape))
                 # print('vis_trg_img:{}'.format(vis_trg_img.shape))
                 # print('vis_mixed_img:{}'.format(vis_mixed_img.shape))
@@ -325,6 +331,10 @@ class Trainer(object):
                 for j in range(batch_size):
                     vis_img_cv = np.rollaxis((vis_img[j] * 255).cpu().data.numpy().astype(np.uint8), 0, 3)[:, :, ::-1]
                     vis_trg_img_cv = np.rollaxis((vis_trg_img[j] * 255).cpu().data.numpy().astype(np.uint8), 0, 3)[:, :, ::-1]
+
+                    # vis_strong_img_cv = np.rollaxis((vis_strong_img[j] * 255).cpu().data.numpy().astype(np.uint8), 0, 3)[:, :, ::-1]
+                    # vis_strong_trg_img_cv = np.rollaxis((vis_strong_trg_img[j] * 255).cpu().data.numpy().astype(np.uint8), 0, 3)[:, :, ::-1]
+
                     vis_target_cv = self.decode_segmap(targets[j].cpu().data.numpy().astype(np.uint8))[:, :, ::-1]
                     vis_pseudo_cv = self.decode_segmap(pseudo_label[j].cpu().data.numpy().astype(np.uint8))[:, :, ::-1]
                     vis_weight_cv = (pseudo_weight[j] * 255).cpu().data.numpy().astype(np.uint8)
@@ -334,6 +344,9 @@ class Trainer(object):
                     # filname = os.path.basename(_files[j])[:-4]
                     # cv2.imwrite(os.path.join(out_dir, f'{(iteration + 1):06d}_{j}_source_img_{filname}.tif'), vis_img_cv)
                     # cv2.imwrite(os.path.join(out_dir, f'{(iteration + 1):06d}_{j}_target_img_{filname}.tif'), vis_trg_img_cv)
+                    # cv2.imwrite(os.path.join(out_dir, f'{(iteration + 1):06d}_{j}_source_strong_img_{filname}.tif'), vis_strong_img_cv)
+                    # cv2.imwrite(os.path.join(out_dir, f'{(iteration + 1):06d}_{j}_target_strong_img_{filname}.tif'), vis_strong_trg_img_cv)
+                    #
                     # cv2.imwrite(os.path.join(out_dir, f'{(iteration + 1):06d}_{j}_source_gt_img_{filname}.tif'), vis_target_cv)
                     # cv2.imwrite(os.path.join(out_dir, f'{(iteration + 1):06d}_{j}_target_pseudo_img_{filname}.tif'), vis_pseudo_cv)
                     # cv2.imwrite(os.path.join(out_dir, f'{(iteration + 1):06d}_{j}_target_weight_img_{filname}.tif'), vis_weight_cv)
@@ -355,25 +368,18 @@ class Trainer(object):
                     )
                     subplotimg(axs[0][0], vis_img[j], 'Source Image')
                     subplotimg(axs[1][0], vis_trg_img[j], 'Target Image')
-                    subplotimg(
-                        axs[0][1],
-                        targets[j],
-                        'Source Seg GT',
-                        cmap='cityscapes')
-                    subplotimg(
-                        axs[1][1],
-                        pseudo_label[j],
-                        'Target Seg (Pseudo) GT',
-                        cmap='cityscapes')
+                    subplotimg(axs[0][1], targets[j], 'Source Seg GT', cmap='cityscapes')
+                    subplotimg(axs[1][1], pseudo_label[j], 'Target Seg (Pseudo) GT', cmap='cityscapes')
                     # subplotimg(axs[0][2], vis_mixed_img[j], 'Mixed Image')
                     # subplotimg(
                     #     axs[1][2], mix_masks[j][0], 'Domain Mask', cmap='gray')
                     # subplotimg(axs[0][3], pred_u_s[j], "Seg Pred",
                     #            cmap="cityscapes")
-                    subplotimg(
-                        axs[1][2], ps_large_p[j], 'Pseudo Thrsed', cmap='cityscapes')
-                    subplotimg(
-                        axs[0][2], pseudo_weight[j], 'Pseudo W.', vmin=0, vmax=1)
+                    subplotimg(axs[1][2], ps_large_p[j], 'Pseudo Thrsed', cmap='cityscapes')
+                    subplotimg(axs[0][2], pseudo_weight[j], 'Pseudo W.', vmin=0, vmax=1)
+
+                    # subplotimg(axs[0][3], vis_strong_img[j], 'Source Strong Image')
+                    # subplotimg(axs[1][3], vis_strong_trg_img[j], 'Target Strong Image')
                     for ax in axs.flat:
                         ax.axis('off')
                     plt.savefig(

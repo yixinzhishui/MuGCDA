@@ -25,7 +25,7 @@ cfg.DATASET.NUM_CHANNELS = 3
 # dataset ignore index
 cfg.DATASET.IGNORE_INDEX = -1
 # workers
-cfg.DATASET.WORKERS = 32
+cfg.DATASET.WORKERS = 32 #32
 # val dataset mode
 cfg.DATASET.MODE = 'val' #'testval'
 cfg.DATASET.NUM_CLASSES = 16
@@ -132,6 +132,9 @@ cfg.SOLVER.WEIGHT_DECAY = 0.01 #0.01 #1e-4 #0.00004
 cfg.SOLVER.DECODER_LR_FACTOR = 10.0
 # lr scheduler mode
 cfg.SOLVER.LR_SCHEDULER = "poly"    #poly   step
+
+cfg.SOLVER.COSINEANNEALINGLR.T_MAX = 8
+cfg.SOLVER.COSINEANNEALINGLR.T_MULT = 1
 # poly power
 cfg.SOLVER.POLY.POWER = 2 #4
 # step gamma

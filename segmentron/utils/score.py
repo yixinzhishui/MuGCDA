@@ -152,6 +152,7 @@ class SegmentationMetric(object):
         # mIoU = IoU.mean().item()
         pixAcc, pixAcc_class = self.pixel_accuracy(), self.pixel_recall()
         IoU, mIoU = self.mean_IoU()
+        mIoU = torch.mean(IoU[:-1])
         FWIoU = self.FW_IoU()
         f1_class, fl_mean = self.F1_score()
         precision_class = self.pixel_precision()
@@ -159,7 +160,7 @@ class SegmentationMetric(object):
         if return_category_iou:
             return pixAcc, mIoU, IoU.cpu().numpy(), pixAcc_class.cpu().numpy() #f1_class.cpu().numpy()        #pixAcc_class.cpu().numpy()
         # if return_category_iou:
-        #     return pixAcc, FWIoU, IoU.cpu().numpy(), precision_class.cpu().numpy(), recall_class.cpu().numpy(), f1_class.cpu().numpy(),
+        #     return pixAcc, mIoU, IoU.cpu().numpy(), precision_class.cpu().numpy(), recall_class.cpu().numpy(), f1_class.cpu().numpy(),
         return pixAcc, mIoU
 
     def reset(self):

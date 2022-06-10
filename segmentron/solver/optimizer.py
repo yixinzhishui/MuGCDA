@@ -98,7 +98,7 @@ def get_optimizer(model):
                 {
                     "params": param_groups[0],
                     "lr": cfg.SOLVER.LR,
-                    "weight_decay": cfg.SOLVER.LR,
+                    "weight_decay": cfg.SOLVER.WEIGHT_DECAY,
                 },
                 {
                     "params": param_groups[1],
@@ -113,7 +113,8 @@ def get_optimizer(model):
             ],
             lr=cfg.SOLVER.LR,
             weight_decay=cfg.SOLVER.WEIGHT_DECAY,
-            betas=(0.9, 0.999)
+            betas=(0.9, 0.999),
+
         )
 
     else:
