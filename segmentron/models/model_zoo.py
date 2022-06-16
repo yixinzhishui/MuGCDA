@@ -137,15 +137,15 @@ def load_model_resume(model, optimizer=None, lr_scheduler=None, scaler=None, res
             msg = model.load_state_dict(state_dict_suitable, strict=False)
             logging.info(msg)
 
-            if optimizer is not None and resume_checkpoint_dict['optimizer'] is not None:
-                logging.info('resume optimizer from resume state..')
-                optimizer.load_state_dict(resume_checkpoint_dict['optimizer'])
-            if lr_scheduler is not None and resume_checkpoint_dict['lr_scheduler'] is not None:
-                logging.info('resume lr scheduler from resume state..')
-                lr_scheduler.load_state_dict(resume_checkpoint_dict['lr_scheduler'])
-            if scaler is not None and resume_checkpoint_dict['scaler'] is not None:
-                logging.info('resume scaler from resume state..')
-                scaler.load_state_dict(resume_checkpoint_dict['scaler'])
+            # if optimizer is not None and resume_checkpoint_dict['optimizer'] is not None:
+            #     logging.info('resume optimizer from resume state..')
+            #     optimizer.load_state_dict(resume_checkpoint_dict['optimizer'])
+            # if lr_scheduler is not None and resume_checkpoint_dict['lr_scheduler'] is not None:
+            #     logging.info('resume lr scheduler from resume state..')
+            #     lr_scheduler.load_state_dict(resume_checkpoint_dict['lr_scheduler'])
+            # if scaler is not None and resume_checkpoint_dict['scaler'] is not None:
+            #     logging.info('resume scaler from resume state..')
+            #     scaler.load_state_dict(resume_checkpoint_dict['scaler'])
 
             current_epoch = resume_checkpoint_dict['epoch']
 

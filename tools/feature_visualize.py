@@ -166,7 +166,7 @@ class Evaluator(object):
                 files.extend(filename)
 
         # Json = dict(source_smaple_feature_vector=vectors)
-        with open(r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/source_smaple_feature_vector_potsdam_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.5_21file.p', 'wb') as p_file:
+        with open(r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/source_smaple_feature_vector_potsdam_potsdam2vaihingen_onlysource_21file_0616.p', 'wb') as p_file:
             pickle.dump([vectors, files], p_file)
 
         logging.info('Eval use time: {:.3f} second'.format(time.time() - time_start))
@@ -190,22 +190,25 @@ def get_subdir_label(path_list):
 
 if __name__ == '__main__':
     """导出特征向量到本地"""
-    # args = parse_args()
-    # cfg.update_from_file(args.config_file)
-    # cfg.update_from_list(args.opts)
-    # cfg.PHASE = 'test'
-    # cfg.check_and_freeze()
-    #
-    # default_setup(args)
-    #
-    # evaluator = Evaluator(args)
-    # evaluator.test()
+    args = parse_args()
+    cfg.update_from_file(args.config_file)
+    cfg.update_from_list(args.opts)
+    cfg.PHASE = 'test'
+    cfg.check_and_freeze()
+
+    default_setup(args)
+
+    evaluator = Evaluator(args)
+    evaluator.test()
 
     """可视化特征向量"""
-    # p_source_dirname = r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/source_smaple_feature_vector_potsdam_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.5_21file.p'
-    # p_target_dirname = r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/target_smaple_feature_vector_potsdam_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.5_16file.p'
+    # p_source_dirname = r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/source_smaple_feature_vector_potsdam_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.5_21file.p' #r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/source_smaple_feature_vector_potsdam_onlysource.p' #r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/source_smaple_feature_vector_potsdam_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.5_21file.p'
+    # p_target_dirname = r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/target_smaple_feature_vector_potsdam_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.5_16file.p'  #r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/target_smaple_feature_vector_vaihingen_onlysource.p' #r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/target_smaple_feature_vector_potsdam_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.5_16file.p'
     # vectors_source, files_source = pickle.load(open(p_source_dirname, "rb"))
     # vectors_target, files_target = pickle.load(open(p_target_dirname, "rb"))
+    #
+    # # vectors_source = pickle.load(open(p_source_dirname, "rb"))
+    # # vectors_target = pickle.load(open(p_target_dirname, "rb"))
     #
     # vectors_source = random.sample(vectors_source, len(vectors_target))
     # # vectors_target = random.sample(vectors_target, len(vectors_source))
@@ -222,31 +225,32 @@ if __name__ == '__main__':
     # plt.scatter(embedding[:, 0], embedding[:, 1], c=vectors_label, cmap='Spectral', s=5)
     # plt.gca().set_aspect('equal', 'datalim')
     # plt.colorbar(boundaries=np.arange(3) - 0.5).set_ticks(np.arange(2))  #boundaries=np.arange(11) - 0.5).set_ticks(np.arange(2)
-    # plt.title('UMAP projection of the Digits dataset')
+    # # plt.title('UMAP projection of the Digits dataset')
+    # plt.axis('off')
     # plt.show()
 
 
-    p_source_dirname = r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/source_smaple_feature_vector_potsdam_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.5_21file.p'
-    p_target_dirname = r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/target_smaple_feature_vector_potsdam_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.5_16file.p'
-    vectors_source, files_source = pickle.load(open(p_source_dirname, "rb"))
-    vectors_target, files_target = pickle.load(open(p_target_dirname, "rb"))
-
-    files = files_source + files_target
-    vectors_label, sub_dir_index = get_subdir_label(files)
-    # vectors_source = random.sample(vectors_source, len(vectors_target))
-    # vectors_target = random.sample(vectors_target, len(vectors_source))
-    # vectors_source_label = [0] * len(vectors_source)
-    # vectors_target_label = [1] * len(vectors_target)
-
-    vectors = vectors_source + vectors_target #list(map(lambda x: x * 2, vectors_target))
-    vectors_concat = np.stack(vectors, axis=0)
-    vectors_label = np.array(vectors_label) #np.array(vectors_source_label + vectors_target_label)
-
-    reducer = umap.UMAP(random_state=42)
-    embedding = reducer.fit_transform(vectors_concat)
-
-    plt.scatter(embedding[:, 0], embedding[:, 1], c=vectors_label, cmap='Spectral', s=5)
-    plt.gca().set_aspect('equal', 'datalim')
-    plt.colorbar(boundaries=np.arange(len(sub_dir_index) + 1) - 0.5).set_ticks(np.arange(len(sub_dir_index)))  #boundaries=np.arange(11) - 0.5).set_ticks(np.arange(2)
-    plt.title('UMAP projection of the Digits dataset')
-    plt.show()
+    # p_source_dirname = r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/source_smaple_feature_vector_potsdam_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.5_21file.p'
+    # p_target_dirname = r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/target_smaple_feature_vector_potsdam_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.5_16file.p'
+    # vectors_source, files_source = pickle.load(open(p_source_dirname, "rb"))
+    # vectors_target, files_target = pickle.load(open(p_target_dirname, "rb"))
+    #
+    # files = files_source + files_target
+    # vectors_label, sub_dir_index = get_subdir_label(files)
+    # # vectors_source = random.sample(vectors_source, len(vectors_target))
+    # # vectors_target = random.sample(vectors_target, len(vectors_source))
+    # # vectors_source_label = [0] * len(vectors_source)
+    # # vectors_target_label = [1] * len(vectors_target)
+    #
+    # vectors = vectors_source + vectors_target #list(map(lambda x: x * 2, vectors_target))
+    # vectors_concat = np.stack(vectors, axis=0)
+    # vectors_label = np.array(vectors_label) #np.array(vectors_source_label + vectors_target_label)
+    #
+    # reducer = umap.UMAP(random_state=42)
+    # embedding = reducer.fit_transform(vectors_concat)
+    #
+    # plt.scatter(embedding[:, 0], embedding[:, 1], c=vectors_label, cmap='Spectral', s=5)
+    # plt.gca().set_aspect('equal', 'datalim')
+    # plt.colorbar(boundaries=np.arange(len(sub_dir_index) + 1) - 0.5).set_ticks(np.arange(len(sub_dir_index)))  #boundaries=np.arange(11) - 0.5).set_ticks(np.arange(2)
+    # plt.title('UMAP projection of the Digits dataset')
+    # plt.show()

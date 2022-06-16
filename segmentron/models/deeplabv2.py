@@ -21,11 +21,19 @@ class DeepLabV2(SegBaseModel):   #deeplab  v1 v2 v3 v3+概要：https://zhuanlan
 
         self.head = ASPP_Classifier_V2(2048, [6, 12, 18, 24], [6, 12, 18, 24], self.nclass)
 
-    def forward(self, x):
+    def forward(self, x, get_feat=False):
         size = x.size()[2:]
         c1, _, c3, c4 = self.encoder(x)
 
         x = self.head(c4)
+
+        if get_feat:
+            out_dict = {}
+            out_dict['feat'] = c4
+            out_dict['out'] = x
+
+            return out_dict
+
         x = F.interpolate(x, size, mode='bilinear', align_corners=True)
 
         return x
