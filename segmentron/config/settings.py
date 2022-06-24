@@ -25,7 +25,7 @@ cfg.DATASET.NUM_CHANNELS = 3
 # dataset ignore index
 cfg.DATASET.IGNORE_INDEX = -1
 # workers
-cfg.DATASET.WORKERS = 32 #32
+cfg.DATASET.WORKERS = 4 #32 #32
 # val dataset mode
 cfg.DATASET.MODE = 'val' #'testval'
 cfg.DATASET.NUM_CLASSES = 16
@@ -142,7 +142,7 @@ cfg.SOLVER.STEP.GAMMA = 0.2
 # milestone of step lr scheduler
 cfg.SOLVER.STEP.DECAY_EPOCH = [10, 20, 30, 50]
 # warm up epochs can be float
-cfg.SOLVER.WARMUP.EPOCHS = 0 #1.  #3
+cfg.SOLVER.WARMUP.EPOCHS = 8 #8 #4 #0 #1.  #3
 # warm up factor
 cfg.SOLVER.WARMUP.FACTOR = 1.0 / 3
 # warm up method

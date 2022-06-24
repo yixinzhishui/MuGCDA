@@ -147,7 +147,7 @@ def load_model_resume(model, optimizer=None, lr_scheduler=None, scaler=None, res
             #     logging.info('resume scaler from resume state..')
             #     scaler.load_state_dict(resume_checkpoint_dict['scaler'])
 
-            current_epoch = resume_checkpoint_dict['epoch']
+            current_epoch = 0 #resume_checkpoint_dict['epoch']
 
             return model, optimizer, lr_scheduler, scaler, current_epoch
     else:
@@ -185,7 +185,7 @@ def update_ema(net1, net2, iter, alpha=0.999):   ##net1:ema_model   net2:base_mo
 
 def update_sample_ema(data1, data2, iter, alpha=0.999):   ##net1:ema_model   net2:base_model
 
-    alpha_teacher = min(1 - 1 / (iter + 1), alpha)    #1 - 1 / (iter + 1)：随着迭代越来越大
+    alpha_teacher = 0.9  #min(1 - 1 / (iter + 1), alpha)    #1 - 1 / (iter + 1)：随着迭代越来越大
     if data1 is None:
         return data2
     else:

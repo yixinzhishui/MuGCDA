@@ -241,11 +241,11 @@ class Trainer(object):
 
             pesudo_softmax = torch.softmax(outputs_pesudo_ema.detach(), dim=1)
             pseudo_prob, pseudo_label = torch.max(pesudo_softmax, dim=1)
-            ps_large_p = pseudo_prob.ge(0.5).long() == 1
+            ps_large_p = pseudo_prob.ge(0.9).long() == 1   #0.5  #
             ps_size = np.size(np.array(pseudo_label.cpu()))
             # print("------------ps_size", ps_size)
             pseudo_weight = torch.sum(ps_large_p).item() / ps_size
-            pseudo_weight = pseudo_weight * torch.ones(pseudo_prob.shape, device=self.device) # torch.ones(pseudo_prob.shape, device=self.device) #pseudo_weight * torch.ones(pseudo_prob.shape, device=self.device)
+            pseudo_weight = torch.ones(pseudo_prob.shape, device=self.device) #pseudo_weight *     # torch.ones(pseudo_prob.shape, device=self.device) #pseudo_weight * torch.ones(pseudo_prob.shape, device=self.device)
             pseudo_weight[ps_large_p != 1] = 0
             # print("------------ps_large_p", torch.sum(ps_large_p != 1))
             outputs_pesudo = self.model(images_pesudo)

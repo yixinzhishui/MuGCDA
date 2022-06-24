@@ -279,7 +279,7 @@ class Trainer(object):
             # print('-------outputs_class_tea:{}'.format(outputs_class_tea))
             loss_class = kd_loss(outputs_class_stu, outputs_class_tea)
 
-            losses_pesudo = loss_pixel * 0.8 + loss_sample * 0.1 + loss_class * 0.1
+            losses_pesudo = loss_pixel * 0.8 + loss_sample * 0.1 + loss_class * 0.1    #loss_class * 0.1
             losses_pesudo.backward()
 
             loss_dict_pixel_reduced = reduce_loss_dict(dict(loss=loss_pixel))
@@ -331,7 +331,7 @@ class Trainer(object):
                 # self.SummaryWriter.add_scalar("mIoU", mIoU, (epoch - 1) * iters_per_epoch + iteration)
                 # self.SummaryWriter.close()
                 self.model.train()
-            if iteration % 100 == 0:
+            if iteration % 100000 == 0:     #100
                 out_dir = os.path.join(cfg.VISUAL.OUTPUT_DIR,
                                        'class_mix_debug_online-ST-Spatial')
                 os.makedirs(out_dir, exist_ok=True)
@@ -420,7 +420,7 @@ class Trainer(object):
         for c in range(outputs.size()[1]):
             vector_class = []
             for n in range(outputs.size()[0]):
-                output_class = outputs[n] * outputs_argmax[n][c]
+                output_class = outputs_softmax[n] * outputs_argmax[n][c]
                 output_class = output_class.sum(dim=1).sum(dim=1) / (outputs_argmax[n][c].sum() + 1e-6)
                 vector_class.append(output_class)
                 # print('---------------:{}'.format(output_class.shape))
@@ -464,7 +464,7 @@ class Trainer(object):
             self.metric.update(output, target)
             pixAcc, mIoU, category_iou, category_pixAcc = self.metric.get(return_category_iou=True)
             logging.info(
-                "[EVAL] Sample: {:d}, pixAcc: {:.3f}, FWIoU: {:.3f}, IOU: {}".format(i + 1, pixAcc * 100, mIoU * 100,
+                "[EVAL] Sample: {:d}, pixAcc: {:.3f}, mIoU: {:.3f}, IOU: {}".format(i + 1, pixAcc * 100, mIoU * 100,
                                                                                      category_iou))
 
             # with open(os.path.join(cfg.VISUAL.LOG_SAVE_DIR, 'valid_log', 'valid_log.csv'), 'a') as f:
