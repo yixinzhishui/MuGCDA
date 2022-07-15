@@ -50,6 +50,8 @@ def get_segmentation_model():
 
                 pretrain_model_dict = torch.load(cfg.TRAIN.BACKBONE_PRETRAINED_PATH, map_location='cpu')
                 load_model_dict = dict()
+                # print(pretrain_model_dict.keys())
+                # print( model.encoder.state_dict().keys())
                 """当输出波段>3时"""
                 for item, value in model.encoder.state_dict().items():
                     if item in pretrain_model_dict.keys() and value.shape == pretrain_model_dict[item].shape:
@@ -61,8 +63,8 @@ def get_segmentation_model():
                 #         load_model_dict[item] = pretrain_model_dict[item]
                 #     else:
                 #         print(item)
-                load_model_dict["_fc.weight"] = 0    ##注：efficientnet：_fc.weight     _fc.bias   segmentation_models_pytorch内置有删除这两个key的代码
-                load_model_dict["_fc.bias"] = 0
+                # load_model_dict["_fc.weight"] = 0    ##注：efficientnet：_fc.weight     _fc.bias   segmentation_models_pytorch内置有删除这两个key的代码
+                # load_model_dict["_fc.bias"] = 0
                 msg = model.encoder.load_state_dict(load_model_dict, strict=False)
                 # msg = model.encoder.load_state_dict(pretrain_model_dict, strict=False)
                 logging.info(msg)

@@ -34,25 +34,30 @@ class SegmentationDataset(object):
 
     def get_TrainAugmentation(self, p=1):
         train_transform = [
-            A.HorizontalFlip(p=0.3),
-            A.VerticalFlip(p=0.3),
-            # A.ShiftScaleRotate(scale_limit=(0.5, 1.5), rotate_limit=(-90, 90), shift_limit=0.1, p=1, border_mode=0),
-            #A.RandomScale(scale_limit=0.3, p=0.3),
-            #A.PadIfNeeded(512, 512, p=1),   #512, 512
-            A.RandomRotate90(p=0.3),
-            # # A.PadIfNeeded(min_height=512, min_width=512, always_apply=True, border_mode=0),
-            A.RandomCrop(height=cfg.TRAIN.CROP_SIZE, width=cfg.TRAIN.CROP_SIZE, always_apply=True),   #512
-            A.ShiftScaleRotate(shift_limit=0.125, scale_limit=0.4, rotate_limit=90, p=0.3),
-            A.GaussNoise(p=0.2),
-            # A.GaussianBlur(blur_limit=(3, 7), p=0.2),
-            # A.Sharpen(alpha=(0.1, 0.3), lightness=(0.3, 0.7), p=1),  # lightness=(0.5, 1.0)   #alpha=(0.2, 0.5)
-            A.RandomBrightnessContrast(p=0.2),
+            # A.HorizontalFlip(p=0.3),
+            # A.VerticalFlip(p=0.3),
+            # # A.ShiftScaleRotate(scale_limit=(0.5, 1.5), rotate_limit=(-90, 90), shift_limit=0.1, p=1, border_mode=0),
+            # #A.RandomScale(scale_limit=0.3, p=0.3),
+            # #A.PadIfNeeded(512, 512, p=1),   #512, 512
+            # A.RandomRotate90(p=0.3),
+            # # # A.PadIfNeeded(min_height=512, min_width=512, always_apply=True, border_mode=0),
+            # A.RandomCrop(height=cfg.TRAIN.CROP_SIZE, width=cfg.TRAIN.CROP_SIZE, always_apply=True),   #512
+            # A.ShiftScaleRotate(shift_limit=0.125, scale_limit=0.4, rotate_limit=90, p=0.3),
+            # A.GaussNoise(p=0.2),
+            # # A.GaussianBlur(blur_limit=(3, 7), p=0.2),
+            # # A.Sharpen(alpha=(0.1, 0.3), lightness=(0.3, 0.7), p=1),  # lightness=(0.5, 1.0)   #alpha=(0.2, 0.5)
+            # A.RandomBrightnessContrast(p=0.2), #------------
             # A.HueSaturationValue(hue_shift_limit=10, sat_shift_limit=5, val_shift_limit=5, p=0.2),
             # A.OpticalDistortion(distort_limit=0.25, shift_limit=0.2, p=0.2),
             # A.MaskDropout(max_objects=3, image_fill_value=0, mask_fill_value=0, p=0.2),
             #A.RandomGamma(gamma_limit=46, p=0.5)
             # A.IAAPerspective(p=0.5),
 
+            A.OneOf([
+            A.HorizontalFlip(always_apply=True),
+            A.VerticalFlip(always_apply=True),
+            A.RandomRotate90(always_apply=True)
+            ], p=0.75),
             # A.OneOf([
             #         A.IAAAdditiveGaussianNoise(),
             #         A.GaussNoise(),
@@ -78,42 +83,42 @@ class SegmentationDataset(object):
 
         ]
 
-        train_transform_2 = A.Compose([
-
-            A.HorizontalFlip(p=0.3),
-            A.VerticalFlip(p=0.3),
-            # A.ShiftScaleRotate(scale_limit=(0.5, 1.5), rotate_limit=(-90, 90), shift_limit=0.1, p=1, border_mode=0),
-            # A.RandomScale(scale_limit=0.3, p=0.3),
-            # A.PadIfNeeded(512, 512, p=1),   #512, 512
-            A.RandomRotate90(p=0.3),
-            # # A.PadIfNeeded(min_height=512, min_width=512, always_apply=True, border_mode=0),
-            A.RandomCrop(height=cfg.TRAIN.CROP_SIZE, width=cfg.TRAIN.CROP_SIZE, always_apply=True),  # 512
-            A.ShiftScaleRotate(shift_limit=0.125, scale_limit=0.4, rotate_limit=90, p=0.3),
-            A.OpticalDistortion(distort_limit=0.25, shift_limit=0.2, p=0.2),
-            A.MaskDropout(max_objects=3, image_fill_value=0, mask_fill_value=0, p=0.2),
-            # color transforms
-            A.OneOf(
-                [
-                    A.RandomBrightnessContrast(p=0.2),
-                    A.RandomGamma(p=0.2),
-                    A.ChannelShuffle(p=0.2),
-                    # A.HueSaturationValue(p=1),
-                    # A.RGBShift(p=1),
-                ],
-                p=0.5,
-            ),
-
-            # noise transforms
-            A.OneOf(
-                [
-                    A.GaussNoise(p=0.2),
-                    A.MultiplicativeNoise(p=0.2),
-                    # A.ImageCompression(quality_lower=0.7, p=1),
-                    A.GaussianBlur(p=0.2),
-                ],
-                p=0.2,
-            ),
-        ])
+        # train_transform_2 = A.Compose([
+        #
+        #     A.HorizontalFlip(p=0.3),
+        #     A.VerticalFlip(p=0.3),
+        #     # A.ShiftScaleRotate(scale_limit=(0.5, 1.5), rotate_limit=(-90, 90), shift_limit=0.1, p=1, border_mode=0),
+        #     # A.RandomScale(scale_limit=0.3, p=0.3),
+        #     # A.PadIfNeeded(512, 512, p=1),   #512, 512
+        #     A.RandomRotate90(p=0.3),
+        #     # # A.PadIfNeeded(min_height=512, min_width=512, always_apply=True, border_mode=0),
+        #     A.RandomCrop(height=cfg.TRAIN.CROP_SIZE, width=cfg.TRAIN.CROP_SIZE, always_apply=True),  # 512
+        #     A.ShiftScaleRotate(shift_limit=0.125, scale_limit=0.4, rotate_limit=90, p=0.3),
+        #     A.OpticalDistortion(distort_limit=0.25, shift_limit=0.2, p=0.2),
+        #     A.MaskDropout(max_objects=3, image_fill_value=0, mask_fill_value=0, p=0.2),
+        #     # color transforms
+        #     A.OneOf(
+        #         [
+        #             A.RandomBrightnessContrast(p=0.2),
+        #             A.RandomGamma(p=0.2),
+        #             A.ChannelShuffle(p=0.2),
+        #             # A.HueSaturationValue(p=1),
+        #             # A.RGBShift(p=1),
+        #         ],
+        #         p=0.5,
+        #     ),
+        #
+        #     # noise transforms
+        #     A.OneOf(
+        #         [
+        #             A.GaussNoise(p=0.2),
+        #             A.MultiplicativeNoise(p=0.2),
+        #             # A.ImageCompression(quality_lower=0.7, p=1),
+        #             A.GaussianBlur(p=0.2),
+        #         ],
+        #         p=0.2,
+        #     ),
+        # ])
 
         return A.Compose(locals()[cfg.TRAIN.DATA_AUGMENT], p=p)  #A.Compose(train_transform, p=p)
 

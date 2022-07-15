@@ -23,6 +23,13 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="root@10.1.11.56:3006">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/data_zs/code/loveDA/pytorchAI_segmentation_loveda" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="root@10.1.11.62:3003">
         <serverdata>
           <mappings>
@@ -80,6 +87,13 @@
         </serverdata>
       </paths>
       <paths name="root@127.0.0.1:3005">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/data_zs/code/loveDA/pytorchAI_segmentation_loveda" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@127.0.0.1:3006">
         <serverdata>
           <mappings>
             <mapping deploy="/data_zs/code/loveDA/pytorchAI_segmentation_loveda" local="$PROJECT_DIR$" web="/" />

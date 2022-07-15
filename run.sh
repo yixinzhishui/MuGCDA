@@ -26,3 +26,6 @@ $PYTHON tools/train.py --config-file configs/sandong/sandong_56_segformer_b3_ce_
 #$PYTHON tools/train.py --config-file configs/sandong/sandong_70_segformer_b1_aug2_ce_dice_scale2.yaml
 wait
 #$PYTHON tools/train.py --config-file configs/sandong/sandong_70_segformer_b1_aug2_dice_sce_contrast_scale2.yaml
+
+#/data_zs/code/loveDA/pytorchAI_segmentation_loveda/tools
+#python tools/train.py --config-file

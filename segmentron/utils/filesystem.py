@@ -64,8 +64,8 @@ def save_checkpoint(model, current_epoch, current_iteration, eva_metric, optimiz
 
     Current_ModelSave = os.listdir(directory)
     Current_ModelSave.sort(key=lambda x: -1 if (x.split('_'))[0] == 'best' else float((x.split('_'))[1]))   #, reverse=True   #https://www.cnblogs.com/chester-cs/p/12252358.html
-    if len(Current_ModelSave) > 9:
-        for remove_ModelFile in Current_ModelSave[1:-9]:
+    if len(Current_ModelSave) > 40:  #9
+        for remove_ModelFile in Current_ModelSave[1:-40]:  #9
             os.remove(os.path.join(directory, remove_ModelFile))
     torch.save(state, os.path.join(directory, '{}_{:.5f}_checkpoint.pth.tar'.format(current_epoch, eva_metric)))
     #torch.save(self.model.state_dict(), os.path.join(self.config.checkpoint_dir, 'checkpoint_{}.pth'.format(self.current_epoch)))

@@ -10,6 +10,14 @@
           <option name="port" value="3004" />
         </fileTransfer>
       </webServer>
+      <webServer id="50d93d27-bb8a-4eb3-96f2-f910b01cba90" name="root@10.1.11.56:3005" url="http://10.1.11.56">
+        <fileTransfer host="10.1.11.56" port="3005" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="3005" />
+        </fileTransfer>
+      </webServer>
     </option>
   </component>
 </project>

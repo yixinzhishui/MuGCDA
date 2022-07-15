@@ -142,7 +142,7 @@ cfg.SOLVER.STEP.GAMMA = 0.2
 # milestone of step lr scheduler
 cfg.SOLVER.STEP.DECAY_EPOCH = [10, 20, 30, 50]
 # warm up epochs can be float
-cfg.SOLVER.WARMUP.EPOCHS = 8 #8 #4 #0 #1.  #3
+cfg.SOLVER.WARMUP.EPOCHS = 0 #8 #4 #0 #1.  #3
 # warm up factor
 cfg.SOLVER.WARMUP.FACTOR = 1.0 / 3
 # warm up method

@@ -89,7 +89,7 @@ class VaihingenPotsdamDataset(SegmentationDataset):
         mask = self.readImage(self.mask_paths[item])
 
         if self.mode == 'train':
-            sample = self.get_TrainAugmentation(0.7)(image=img.astype(np.uint8), mask=mask.astype(np.uint8))   #np.float32  np.uint8
+            sample = self.get_TrainAugmentation(0.7)(image=img.astype(np.uint8), mask=mask.astype(np.uint8))  #0.7  #np.float32  np.uint8
             img, mask = sample['image'], sample['mask']
 
             mask = self.encode_segmap(mask)

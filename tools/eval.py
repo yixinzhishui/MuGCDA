@@ -40,7 +40,7 @@ class Evaluator(object):
         ])
 
         # dataset and dataloader
-        val_dataset = get_segmentation_dataset(cfg.DATASET.NAME,  #cfg.VAL.DATASET_NAME  cfg.DATASET.NAME
+        val_dataset = get_segmentation_dataset(cfg.VAL.DATASET_NAME,  #cfg.VAL.DATASET_NAME  cfg.DATASET.NAME
                                                root=cfg.VAL.ROOT_PATH,
                                                data_list_root=cfg.VAL.DATA_LIST, split='val', mode='testval', transform=input_transform)
         #val_dataset = get_segmentation_dataset(cfg.DATASET.NAME, data_list_root=cfg.DATASET.DATA_LIST, split='val', mode='testval', transform=input_transform)

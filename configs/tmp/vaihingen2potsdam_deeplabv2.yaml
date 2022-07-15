@@ -1,0 +1,71 @@
+CURRENT_GPU: 0
+TRAIN_STEP_ADD: False
+DATASET:
+    MEAN: [0.5, 0.5, 0.5] #[0.29310304, 0.2636692, 0.20883968, 0.39742813]  #[0.5, 0.5, 0.5]
+    STD:  [0.5, 0.5, 0.5] #[0.09101917, 0.09300123, 0.106814794, 0.1142725]       #[0.5, 0.5, 0.5]
+    NUM_CHANNELS: 3 #4
+    NUM_CLASSES: 6
+    CLASS_INDEX: [{0:[255, 255, 255],
+                   1: [0, 0, 255],
+                   2: [0, 255, 255],
+                   3: [0, 255, 0],
+                   4: [255, 255, 0],
+                   5: [255, 0, 0]}]   #[0, 255]
+    IGNORE_INDEX: 255
+
+TRAIN:
+    EPOCHS: 100
+    GRAD_STEPS: 1
+    MODEL_SCALE: 1
+    CROP_SIZE: 512 #(512, 512)
+    BATCH_SIZE: 4 #12_2080ti_2  32_3090_11G_1.5   16_2080ti_2
+    SOURCE:
+        DATASET_NAME: "vaihingenpotsdam_dataset"
+        ROOT_PATH: /data_zs/data/expert_datasets/isprs_2d_semantic_p512_s512/vaihingen/train #/dataset/data/sandong_dataset #/data_zs/data/sandong_dataset
+        DATA_LIST: #/dataset/data/sandong_dataset/train/split.csv #/data_zs/data/sandong_dataset/train/split.csv
+    TARGET:
+        DATASET_NAME: "vaihingenpotsdam_dataset"
+        ROOT_PATH: /data_zs/data/expert_datasets/isprs_2d_semantic_splitbyfile/postman/train #/dataset/data/sandong_dataset #/data_zs/data/sandong_dataset
+        DATA_LIST: #/dataset/data/sandong_dataset/train/split.csv #/data_zs/data/sandong_dataset/train/split.csv
+    FOLD: 0
+    DATA_AUGMENT: train_transform
+    BACKBONE_PRETRAINED_PATH: /data_zs/data/pretrained_models/resnet101-5d3b4d8f.pth #/data_zs/data/pretrained_models/mit_b1.pth #/dataset/data/pretrained_models/mit_b1.pth #
+    PRETRAINED_MODEL_PATH: /data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/checkpoint_v2/vaihingen2potdam_deeplabv2_ce_onlysource_3005/19_0.42490_checkpoint.pth.tar  #/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/checkpoint/potdam2vaihingen_segformer_b2_ce_dice_onlysource_weakAug/best_checkpoint.pth.tar  #/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/checkpoint/potdam2vaihingen_segformer_b2_ce_dice_onlysource/best_checkpoint.pth.tar #/data_zs/output/loveDA_out/pytorchAI_segmentation/checkpoint/loveda_segformer_b2_onlysource_ce_dice/best_checkpoint.pth.tar #/data_zs/output/loveDA_out/pytorchAI_segmentation/checkpoint/sandong_segformer_b2_ce_dice_ep200/20_0.48615_checkpoint.pth.tar #/data_zs/output/loveDA_out/pytorchAI_segmentation/checkpoint/sandong_segformer_b2_ce_dice_ep200/16_0.45230_checkpoint.pth.tar #/dataset/rsipac_runs/semi_stage/checkpoints/SegFormer_mit_b3_gdal_landcover_common_2021-10-25-08-51/best_checkpoint.pth.tar
+    AMP: False
+
+VAL:
+    DATASET_NAME: "vaihingenpotsdam_dataset"
+    BATCH_SIZE: 4 #12   24_2080ti_2
+    CROP_SIZE: 512 #512 #(512, 512)
+    ROOT_PATH: /data_zs/data/expert_datasets/isprs_2d_semantic_splitbyfile/postman/test #val #/dataset/data/sandong_dataset #/data_zs/data/sandong_dataset
+    DATA_LIST: #/dataset/data/sandong_dataset/train/split.csv #/data_zs/data/sandong_dataset/train/split.csv #/workspace/dataset/rsipac_semi_val_list_6000_b3.txt #/dataset/config/rsipac/select5985_val_from_rsipac_semi_full_35000_remain_random.txt #/data/open_datasets/GID_RGB_15_512x512_0overlap_sub/train/GID15_train_list_subset_balance.txt
+TEST:
+    BATCH_SIZE: 4
+    CROP_SIZE: #512 #(512, 512)
+    TEST_MODEL_PATH: /data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/checkpoint_v3/vaihingen2potdam_deeplabv2_ce_onlysource_weakaug_3005/best_checkpoint.pth.tar #/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/checkpoint/potdam2vaihingen_segformer_b2_ce_dice_pesudo0.5_weight_st_online_ema_spatial-d5-w0.1-ema-source/best_checkpoint.pth.tar  #/data_zs/output/sandong_runs/checkpoint/sandong_segformer_b1_ce_dice_512_fold0-515_0119/best_checkpoint.pth.tar #/workspace/runs/best_checkpoint.pth.tar #/dataset/rsipac_runs/checkpoints/SegFormer_mit_b1_gdal_landcover_common_2021-10-17-13-00/best_checkpoint.pth.tar #/dataset/rsipac_runs/checkpoints/SegFormer_mit_b5_gdal_landcover_common_2021-10-06-08-00/best_checkpoint.pth.tar #/dataset/rsipac_runs/checkpoints/best_0.66343_68.11_checkpoint.pth.tar #/dataset/rsipac_runs/checkpoints/SegFormer_mit_b3_gdal_landcover_common_2021-10-03-14-14/best_checkpoint.pth.tar #/dataset/rsipac_runs/checkpoints/SegFormer_mit_b3_gdal_landcover_common_2021-10-02-11-41/98_0.66089_checkpoint.pth.tar #/dataset/rsipac_runs/checkpoints/SegFormer_mit_b3_gdal_landcover_common_2021-09-28-01-30/59_0.66541_checkpoint.pth.tar #/dataset/rsipac_runs/checkpoints/SegFormer_mit_b3_gdal_landcover_common_2021-09-25-11-32/120_0.66107_checkpoint.pth.tar
+    USE_TTA: False
+
+SOLVER:
+    OPTIMIZER: "sgd"
+    LR_SCHEDULER: poly #'one_cylcle' #poly #cosine  one_cylcle
+    LR: 5e-4
+    WEIGHT_DECAY: 0.0005
+    LOSS_NAME: ce_loss #ohem_ce_loss_v2 #ce_focal_diceloss #ce_focal_diceloss #ce_focalloss #dice_sce_contrast_loss #ce_loss #imagebase_CEloss #focal_diceloss #"pixelcontrast"
+
+MODEL:
+    SOURCE: #"smp"
+    MODEL_NAME: "DeepLabV2" #"Unet"
+    BACKBONE: "resnet101" #"efficientnet-b3"
+    ACTIVATION: #"sigmoid"
+
+VISUAL:
+    LOG_SAVE_DIR: /data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/logs_debug_ #/dataset/output/sandong_runs/logs #/data_zs/output/sandong_runs/logs #/code/python/pytorch/runs/logs
+    MODEL_SAVE_DIR: /data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/checkpoint_debug_ #/dataset/output/sandong_runs/checkpoint #/data_zs/output/sandong_runs/checkpoint #/code/python/pytorch/runs/checkpoints
+    OUTPUT_DIR: /data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/visual_debug_ #/dataset/output/sandong_runs/visual #/data_zs/output/sandong_runs/visual
+    CURRENT_NAME: vaihingen2potdam_resnet101_deeplabv2_ce_st_online_ema_spatial_adapt-pseudo-0.6_p4  #_spatial-smaple-d5-class-ema-w0.1-ema-source #potdam2vaihingen_segformer_b2_ce_dice_pesudo0.5-0.9-weight-layer3_st_online_ema_spatial-smaple-d5-class-w0.1-ema-source #_pixel-aux-w0.45 #loveda_segformer_b2_onlysource_ce_dice #loveda_segformer_b2_ce_dice_pesudo_st_ema
+UTILS:
+    VAL_START: 0 #62 #62
+    EPOCH_STOP: 100 #66 #67
+
+
+
