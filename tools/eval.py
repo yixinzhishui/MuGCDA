@@ -40,7 +40,7 @@ class Evaluator(object):
         ])
 
         # dataset and dataloader
-        val_dataset = get_segmentation_dataset(cfg.VAL.DATASET_NAME,  #cfg.VAL.DATASET_NAME  cfg.DATASET.NAME
+        val_dataset = get_segmentation_dataset(cfg.DATASET.NAME,  #cfg.VAL.DATASET_NAME  cfg.DATASET.NAME
                                                root=cfg.VAL.ROOT_PATH,
                                                data_list_root=cfg.VAL.DATA_LIST, split='val', mode='testval', transform=input_transform)
         #val_dataset = get_segmentation_dataset(cfg.DATASET.NAME, data_list_root=cfg.DATASET.DATA_LIST, split='val', mode='testval', transform=input_transform)
@@ -75,7 +75,7 @@ class Evaluator(object):
 
         self.metric = SegmentationMetric(cfg.DATASET.NUM_CLASSES , args.distributed)
 
-        self.output_dir = os.path.join(cfg.VISUAL.OUTPUT_DIR, 'val_' + cfg.VISUAL.CURRENT_NAME)   #cfg.VISUAL.CURRENT_NAME
+        self.output_dir = os.path.join(cfg.VISUAL.OUTPUT_DIR, cfg.VISUAL.CURRENT_NAME)   #cfg.VISUAL.CURRENT_NAME
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
 
@@ -203,7 +203,7 @@ class Evaluator(object):
 
 if __name__ == '__main__':
     args = parse_args()
-    cfg.update_from_file(args.config_file)
+    cfg.update_from_file('/data_zs/code/loveDA/pytorchAI_segmentation_loveda/configs/test/potsdam2vaihingen_onlsource_segformer.yaml')  #args.config_file
     cfg.update_from_list(args.opts)
     cfg.PHASE = 'test'
     #cfg.ROOT_PATH = r"/data_zs/data/data_cj_images" #r'/data_zs/data/test_crop'             #root_path
@@ -211,5 +211,6 @@ if __name__ == '__main__':
 
     default_setup(args)
 
+    #cfg.__setattr__("TEST.TEST_MODEL_PATH", '/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/checkpoint_debug_/potsdam2vaihingen_resnet101_deeplabv2_ce_st_online_ema_spatial_adapt-pseudo-0.6_p4/44_0.57631_checkpoint.pth.tar')
     evaluator = Evaluator(args)
     evaluator.eval()

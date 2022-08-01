@@ -2,9 +2,9 @@ import argparse
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Segmentron')
-    parser.add_argument('--config-file', default= r'/data_zs/code/loveDA/pytorchAI_segmentation_loveda/configs/tmp/loveda_vaihingen2potsdam_segformer.yaml', metavar="FILE", #/data_zs/code/loveDA/pytorchAI_segmentation_loveda/configs/vaihingen_potsdam/loveda_potsdam2vaihingen_segformer.yaml #/code/python/pytorch/sandong/pytorchAI_segmentation_sandong/configs/sandong_segformer.yaml    #/data_zs/code/sandong/pytorchAI_segmentation_sandong/configs/sandong_segformer.yaml
+    parser.add_argument('--config-file', default= r'/data_zs/code/loveDA/pytorchAI_segmentation_loveda/configs/test/vaihingen2potsdam_onlysource_deeplabv2.yaml', metavar="FILE", #/data_zs/code/loveDA/pytorchAI_segmentation_loveda/configs/vaihingen_potsdam/loveda_potsdam2vaihingen_segformer.yaml #/code/python/pytorch/sandong/pytorchAI_segmentation_sandong/configs/sandong_segformer.yaml    #/data_zs/code/sandong/pytorchAI_segmentation_sandong/configs/sandong_segformer.yaml
                         help='config file path')   #, required=True  #metavar：https://www.cnblogs.com/Allen-rg/p/12234237.html  自改：加default= r'configs/cityscapes_deeplabv3_plus.yaml'    #r'/data/Landcover/SegmenTron-master/configs/landcover9num_deeplabv3_plus.yaml'
-    # cuda setting       #/code/python/pytorch/pytorchAI_segmentation_rsipac_transfer_v2/configs/rsipac_segformer.yaml  /workspace/configs/rsipac_segformer_test.yaml
+    # cuda setting       #/code/python/pytorch/pytorchAI_segmentation_rsipac_transfer_v2/configs/rsipac_segformer.yaml  /workspace/configs/rsipac_segformer_test.yaml    #vaihingen_potsdam
 
     parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='disables CUDA training')

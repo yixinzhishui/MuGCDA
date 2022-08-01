@@ -149,7 +149,7 @@ def load_model_resume(model, optimizer=None, lr_scheduler=None, scaler=None, res
             #     logging.info('resume scaler from resume state..')
             #     scaler.load_state_dict(resume_checkpoint_dict['scaler'])
 
-            current_epoch = 0 #resume_checkpoint_dict['epoch']
+            current_epoch = 0 #resume_checkpoint_dict['epoch']  #0 #
 
             return model, optimizer, lr_scheduler, scaler, current_epoch
     else:

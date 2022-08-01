@@ -43,8 +43,8 @@ class Evaluator(object):
         ])
         self.class_numbers = cfg.DATASET.NUM_CLASSES
         # dataset and dataloader
-        self.test_dataset = get_segmentation_dataset(cfg.VAL.DATASET_NAME,
-                                                        root='/data_zs/data/expert_datasets/isprs_2d_semantic_splitbyfile/postman/train',  #/data_zs/data/expert_datasets/isprs_2d_semantic_splitbyfile/postman/val   #'/data_zs/data/domain_adaptation/vaihingen_postdam/postdam'
+        self.test_dataset = get_segmentation_dataset(cfg.DATASET.NAME,
+                                                        root='/data_zs/data/expert_datasets/isprs_2d_semantic_splitbyfile/vaihingen/train',  #/data_zs/data/expert_datasets/isprs_2d_semantic_splitbyfile/postman/val   #'/data_zs/data/domain_adaptation/vaihingen_postdam/postdam'
                                                         data_list_root=None,
                                                         split='train',
                                                         mode=cfg.DATASET.MODE,
@@ -114,6 +114,7 @@ class Evaluator(object):
             labels_expanded = self.process_label(labels_val)
             outputs_pred = labels_expanded * outputs_argmax
         scale_factor = F.adaptive_avg_pool2d(outputs_pred, 1)
+        print('---------------scale_factor:{}'.format(scale_factor))
         vectors = []
         ids = []
         print('-----------------feat_cls:{}'.format(feat_cls.shape))
@@ -171,7 +172,7 @@ class Evaluator(object):
                 files.extend(filename)
 
         # Json = dict(source_smaple_feature_vector=vectors)
-        with open(r'/data_zs/output/vaihingen2potsdam/config/feature_class/target_class_feature_vector_potsdam_vaihingen2potsdam_onlysource_.p', 'wb') as p_file:   #/data_zs/output/vaihingen2potsdam/config/feature_class   /data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/feature_class/source_class_feature_vector_potsdam_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.1-ema-source_16file.p
+        with open(r'/data_zs/config/domain_adaption/deeplabv2_class_feature_vector_potsdam2vaihingen_onlytarget_.p', 'wb') as p_file:   #/data_zs/output/vaihingen2potsdam/config/feature_class   /data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/feature_class/source_class_feature_vector_potsdam_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.1-ema-source_16file.p
             pickle.dump([vectors, ids, files], p_file)
 
         logging.info('Eval use time: {:.3f} second'.format(time.time() - time_start))
@@ -207,7 +208,7 @@ if __name__ == '__main__':
     # evaluator.test()
 
     """可视化特征向量"""
-    p_dirname = r'/data_zs/output/vaihingen2potsdam/config/feature_class/target_class_feature_vector_potsdam_vaihingen2potsdam_onlysource_.p' #r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/feature_class/source_class_feature_vector_potsdam_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.1-ema-source_21file.p' #r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/feature_class/target_class_feature_vector_vaihingen_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.1-ema-source_16file.p'
+    p_dirname = r'/data_zs/config/domain_adaption/deeplabv2_class_feature_vector_potsdam2vaihingen_onlytarget_.p' #r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/feature_class/source_class_feature_vector_potsdam_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.1-ema-source_21file.p' #r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/feature_class/target_class_feature_vector_vaihingen_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.1-ema-source_16file.p'
     vectors, ids, files = pickle.load(open(p_dirname, "rb"))
 
     # vectors_target = random.sample(vectors_target, len(vectors_source))
@@ -218,14 +219,14 @@ if __name__ == '__main__':
     reducer = umap.UMAP(random_state=42)
     embedding = reducer.fit_transform(vectors_concat)
 
-    # reducer = manifold.TSNE(n_components=2, init='pca', random_state=0, perplexity=50, verbose=1, n_iter=1500)
+    # reducer = manifold.TSNE(n_components=2, init='pca', random_state=0, perplexity=50, verbose=1, n_iter=1000)  #1500
     # embedding = reducer.fit_transform(vectors_concat)
 
     plt.scatter(embedding[:, 0], embedding[:, 1], c=vectors_label, cmap='Spectral', s=5)
     plt.gca().set_aspect('equal', 'datalim')
     plt.colorbar(boundaries=np.arange(len(np.unique(vectors_label)) + 1) - 0.5).set_ticks(np.arange(len(np.unique(vectors_label))))  #boundaries=np.arange(11) - 0.5).set_ticks(np.arange(2)
     # plt.title('UMAP projection of the Digits dataset')
-    plt.axis('off')
+    # plt.axis('off')
     plt.show()
 
 

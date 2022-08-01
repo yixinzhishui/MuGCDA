@@ -60,7 +60,7 @@ VISUAL:
     CURRENT_NAME: potdam2vaihingen_deeplabv3+_ce_onlysource_weakaug_3006 #loveda_segformer_b2_onlysource_ce_dice #loveda_segformer_b2_ce_dice_pesudo_st_ema
 UTILS:
     VAL_START: 0 #62 #62
-    EPOCH_STOP: 100 #66 #67
+    EPOCH_STOP: 40 #66 #67
 
 
 
