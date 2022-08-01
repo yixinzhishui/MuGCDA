@@ -274,46 +274,46 @@ if __name__ == '__main__':
 
 
     '''可视化特征向量---指定两个类'''
-    p_dirname = r'/data_zs/config/domain_adaption/deeplabv2_class_feature_vector_potsdam2vaihingen_onlysourcce_source_0.42789.p'  # r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/feature_class/source_class_feature_vector_potsdam_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.1-ema-source_21file.p' #r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/feature_class/target_class_feature_vector_vaihingen_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.1-ema-source_16file.p'
-    vectors, ids, files = pickle.load(open(p_dirname, "rb"))
-
-    # vectors_target = random.sample(vectors_target, len(vectors_source))
-
-    vectors_concat = np.concatenate(vectors, axis=0)
-    vectors_label = np.concatenate(ids, axis=0)
-
-    # select_index = np.where((vectors_label == 1) | (vectors_label == 2) | (vectors_label == 3))[0]
-    select_index = np.where((vectors_label == 2) | (vectors_label == 3))[0]
-    # print(len(select_index))
-    # select_index = select_index[np.random.choice(len(select_index), int(len(select_index) / 16))]
-    # print(len(select_index))
-    vectors_concat = vectors_concat[select_index, :]
-    vectors_label = vectors_label[select_index]
-
-    # vectors_label[np.where(vectors_label == 1)] = 0
-    # vectors_label[np.where(vectors_label == 2)] = 1
-    # vectors_label[np.where(vectors_label == 3)] = 2
-
-    vectors_label[np.where(vectors_label == 2)] = 0
-    vectors_label[np.where(vectors_label == 3)] = 1
-
-    print('-----------------vectors_concat:{}'.format(vectors_concat.shape))
-    print('-----------------vectors_label:{}'.format(vectors_label.shape))
-    reducer = umap.UMAP(n_neighbors=100, random_state=42, n_epochs=1000)   #https://cloud.tencent.com/developer/article/1901726
-    embedding = reducer.fit_transform(vectors_concat)
-
-    # reducer = manifold.TSNE(n_components=2, init='pca', random_state=0, perplexity=50, verbose=1, n_iter=2500)
+    # p_dirname = r'/data_zs/config/domain_adaption/deeplabv2_class_feature_vector_potsdam2vaihingen_uda_target_0.57631.p'  # r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/feature_class/source_class_feature_vector_potsdam_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.1-ema-source_21file.p' #r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/feature_class/target_class_feature_vector_vaihingen_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.1-ema-source_16file.p'
+    # vectors, ids, files = pickle.load(open(p_dirname, "rb"))
+    #
+    # # vectors_target = random.sample(vectors_target, len(vectors_source))
+    #
+    # vectors_concat = np.concatenate(vectors, axis=0)
+    # vectors_label = np.concatenate(ids, axis=0)
+    #
+    # # select_index = np.where((vectors_label == 1) | (vectors_label == 2) | (vectors_label == 3))[0]
+    # select_index = np.where((vectors_label == 2) | (vectors_label == 3))[0]
+    # # print(len(select_index))
+    # # select_index = select_index[np.random.choice(len(select_index), int(len(select_index) / 16))]
+    # # print(len(select_index))
+    # vectors_concat = vectors_concat[select_index, :]
+    # vectors_label = vectors_label[select_index]
+    #
+    # # vectors_label[np.where(vectors_label == 1)] = 0
+    # # vectors_label[np.where(vectors_label == 2)] = 1
+    # # vectors_label[np.where(vectors_label == 3)] = 2
+    #
+    # vectors_label[np.where(vectors_label == 2)] = 0
+    # vectors_label[np.where(vectors_label == 3)] = 1
+    #
+    # print('-----------------vectors_concat:{}'.format(vectors_concat.shape))
+    # print('-----------------vectors_label:{}'.format(vectors_label.shape))
+    # reducer = umap.UMAP(n_neighbors=100, random_state=42, n_epochs=1000)   #https://cloud.tencent.com/developer/article/1901726
     # embedding = reducer.fit_transform(vectors_concat)
-
-    plt.scatter(embedding[:, 0], embedding[:, 1], c=vectors_label, cmap='Spectral', s=6)
-    plt.gca().set_aspect('equal', 'datalim')
-    plt.colorbar(boundaries=np.arange(len(np.unique(vectors_label)) + 1) - 0.5).set_ticks(
-        np.arange(len(np.unique(vectors_label))))  # boundaries=np.arange(11) - 0.5).set_ticks(np.arange(2)
-    # plt.title('UMAP projection of the Digits dataset')
-    # plt.axis('off')
-    plt.show()
-
-    # out_csv = r'/data_zs/config/domain_adaption/segformerb2_class_feature_vector_potsdam2vaihingen_uda_source_0.66696.csv'
+    #
+    # # reducer = manifold.TSNE(n_components=2, init='pca', random_state=0, perplexity=50, verbose=1, n_iter=2500)
+    # # embedding = reducer.fit_transform(vectors_concat)
+    #
+    # plt.scatter(embedding[:, 0], embedding[:, 1], c=vectors_label, cmap='Spectral', s=6)
+    # plt.gca().set_aspect('equal', 'datalim')
+    # plt.colorbar(boundaries=np.arange(len(np.unique(vectors_label)) + 1) - 0.5).set_ticks(
+    #     np.arange(len(np.unique(vectors_label))))  # boundaries=np.arange(11) - 0.5).set_ticks(np.arange(2)
+    # # plt.title('UMAP projection of the Digits dataset')
+    # # plt.axis('off')
+    # plt.show()
+    #
+    # out_csv = r'/data_zs/config/domain_adaption/deeplabv2_class_feature_vector_potsdam2vaihingen_uda_target_0.57631.csv'
     # dict = {'x': embedding[:, 0].tolist(),
     #         'y': embedding[:, 1].tolist(),
     #         'label': vectors_label.tolist()}
@@ -375,3 +375,114 @@ if __name__ == '__main__':
     # # plt.title('UMAP projection of the Digits dataset')
     # # plt.axis('off')
     # plt.show()
+
+
+    '''可视化源域和目标域的特征向量---指定两个类-----fromcsv'''
+    # source_csv_dirname = r'/data_zs/config/domain_adaption/deeplabv2_class_feature_vector_potsdam2vaihingen_uda_source_0.57631.csv'  # r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/feature_class/source_class_feature_vector_potsdam_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.1-ema-source_21file.p' #r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/feature_class/target_class_feature_vector_vaihingen_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.1-ema-source_16file.p'
+    # target_csv_dirname = r'/data_zs/config/domain_adaption/deeplabv2_class_feature_vector_potsdam2vaihingen_uda_target_0.57631.csv'
+    #
+    # embedding_source = pd.read_csv(source_csv_dirname)
+    # embedding_source_x = embedding_source['x']
+    # embedding_source_y = embedding_source['y']
+    # embedding_source_label = embedding_source['label']
+    #
+    # embedding_source_x = np.array(embedding_source_x)
+    # embedding_source_x = embedding_source_x - 10
+    # embedding_source_y = np.array(embedding_source_y)
+    # embedding_source_y = embedding_source_y - 10
+    # embedding_source_label = np.array(embedding_source_label)
+    #
+    #
+    # embedding_target = pd.read_csv(target_csv_dirname)
+    # embedding_target_x = embedding_target['x']
+    # embedding_target_y = embedding_target['y']
+    # embedding_target_label = embedding_target['label']
+    #
+    # embedding_target_x = np.array(embedding_target_x)
+    # embedding_target_x = embedding_target_x #- 50
+    # embedding_target_y = np.array(embedding_target_y)
+    # embedding_target_y = embedding_target_y #+ 40
+    # embedding_target_label = np.array(embedding_target_label)
+    # embedding_target_label[np.where(embedding_target_label == 0)] = 2
+    # embedding_target_label[np.where(embedding_target_label == 1)] = 3
+    #
+    # embedding_x = np.concatenate([embedding_source_x, embedding_target_x], axis=0)
+    # embedding_y = np.concatenate([embedding_source_y, embedding_target_y], axis=0)
+    # embedding_label = np.concatenate([embedding_source_label, embedding_target_label], axis=0)
+    #
+    # # reducer = manifold.TSNE(n_components=2, init='pca', random_state=0, perplexity=50, verbose=1, n_iter=2500)
+    # # embedding = reducer.fit_transform(vectors_concat)
+    #
+    # fig = plt.figure(figsize=(6, 6))
+    # plt.scatter(embedding_x, embedding_y, c=embedding_label, cmap='Spectral', s=6)
+    # plt.gca().set_aspect('equal', 'datalim')
+    # # plt.colorbar(boundaries=np.arange(len(np.unique(embedding_label)) + 1) - 0.5).set_ticks(
+    # #     np.arange(len(np.unique(embedding_label))))  # boundaries=np.arange(11) - 0.5).set_ticks(np.arange(2)
+    # # plt.title('UMAP projection of the Digits dataset')
+    # # plt.axis('off')
+    #
+    # ax = plt.subplot()
+    # ax.set_xticks([])
+    # ax.set_yticks([])
+    # plt.show()
+
+    # out_csv = r'/data_zs/config/domain_adaption/segformerb2_class_feature_vector_potsdam2vaihingen_uda_sourcetarget-5_0.66696.csv'
+    # dict = {'x': embedding_x.tolist(),
+    #         'y': embedding_y.tolist(),
+    #         'label': embedding_label.tolist()}
+    # df = pd.DataFrame(dict)
+    # df.to_csv(out_csv)
+
+    """可视化特征向量--全类(除去背景类)--from.p文件"""
+    p_dirname = r'/data_zs/config/domain_adaption/segformerb2_class_feature_vector_potsdam2vaihingen_uda_target_0.66696.p' #r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/feature_class/source_class_feature_vector_potsdam_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.1-ema-source_21file.p' #r'/data_zs/output/potsdam2vaihingen/pytorchAI_segmentation/config/feature_class/target_class_feature_vector_vaihingen_potsdam2vaihingen_pesudo0.5_weight_st_online_ema_spatial-d5-w0.1-ema-source_16file.p'
+    vectors, ids, files = pickle.load(open(p_dirname, "rb"))
+
+    # vectors_target = random.sample(vectors_target, len(vectors_source))
+
+    vectors_concat = np.concatenate(vectors, axis=0)
+    vectors_label = np.concatenate(ids, axis=0)
+    print('-----------------vectors_concat:{}'.format(vectors_concat.shape))
+    print('-----------------vectors_label:{}'.format(vectors_label.shape))
+
+    delete_index = np.where(vectors_label == 5)[0]
+    print(len(delete_index))
+    vectors_concat = np.delete(vectors_concat, delete_index, axis=0)
+    vectors_label = np.delete(vectors_label, delete_index, axis=0)
+    print('-----------------vectors_concat:{}'.format(vectors_concat.shape))
+    print('-----------------vectors_label:{}'.format(vectors_label.shape))
+
+    select_index = np.random.choice(len(vectors_label), int(len(vectors_label) / 16))
+    print(len(select_index))
+    vectors_concat = vectors_concat[select_index, :]
+    vectors_label = vectors_label[select_index]
+
+    print('-----------------vectors_concat:{}'.format(vectors_concat.shape))
+    print('-----------------vectors_label:{}'.format(vectors_label.shape))
+
+
+    reducer = umap.UMAP(n_neighbors=100, random_state=42, n_epochs=1000)   #https://cloud.tencent.com/developer/article/1901726
+    embedding = reducer.fit_transform(vectors_concat)
+
+    # reducer = manifold.TSNE(n_components=2, init='pca', random_state=0, perplexity=50, verbose=1, n_iter=1500)
+    # embedding = reducer.fit_transform(vectors_concat)
+
+    fig = plt.figure(figsize=(6, 6))
+    plt.scatter(embedding[:, 0], embedding[:, 1], c=vectors_label, cmap='Spectral', s=6)
+    plt.gca().set_aspect('equal', 'datalim')
+    # plt.colorbar(boundaries=np.arange(len(np.unique(vectors_label)) + 1) - 0.5).set_ticks(np.arange(len(np.unique(vectors_label))))  #boundaries=np.arange(11) - 0.5).set_ticks(np.arange(2)
+    # plt.title('UMAP projection of the Digits dataset')
+    # plt.axis('off')
+    # plt.show()
+
+    ax = plt.subplot()
+    ax.set_xticks([])
+    ax.set_yticks([])
+    plt.show()
+
+    out_csv = r'/data_zs/config/domain_adaption/segformerb2_class_feature_vector_potsdam2vaihingen_uda_target_0.66696_allclass.csv'
+    dict = {'x': embedding[:, 0].tolist(),
+            'y': embedding[:, 1].tolist(),
+            'label': vectors_label.tolist()}
+    df = pd.DataFrame(dict)
+    df.to_csv(out_csv)
+
