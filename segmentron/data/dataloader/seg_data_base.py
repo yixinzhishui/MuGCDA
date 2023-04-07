@@ -10,10 +10,10 @@ from ...config import cfg
 __all__ = ['SegmentationDataset']
 
 
-class SegmentationDataset(object):                           #包含数据增强：中心裁减、水平翻转、色彩抖动，尺度缩放
+class SegmentationDataset(object):
     """Segmentation Base Dataset"""
 
-    def __init__(self, root, split, mode, transform, base_size=520, crop_size=480):  #base_size=520, crop_size=480
+    def __init__(self, root, split, mode, transform, base_size=520, crop_size=480):
         super(SegmentationDataset, self).__init__()
         self.root = os.path.join(cfg.DATASET.ROOT_PATH, root)
         self.transform = transform
@@ -24,14 +24,14 @@ class SegmentationDataset(object):                           #包含数据增强
         self.color_jitter = self._get_color_jitter()
 
     def to_tuple(self, size):
-        if isinstance(size, (list, tuple)):      #https://blog.csdn.net/zenghaitao0128/article/details/78509297
+        if isinstance(size, (list, tuple)):
             return tuple(size)
         elif isinstance(size, (int, float)):
             return tuple((size, size))
         else:
             raise ValueError('Unsupport datatype: {}'.format(type(size)))
 
-    def _get_color_jitter(self):                              #色彩抖动
+    def _get_color_jitter(self):
         color_jitter = cfg.AUG.COLOR_JITTER
         if color_jitter is None:
             return None
@@ -50,8 +50,8 @@ class SegmentationDataset(object):                           #包含数据增强
         w, h = img.size
         if w > h:
             oh = short_size
-            ow = int(1.0 * w * oh / h)       #以原图像与目标图像的短边为基准，，使重采样前后短边尺寸一样，原图像纵横比不变
-        else:                                #self.crop_size为方块，不会出现问题
+            ow = int(1.0 * w * oh / h)
+        else:
             ow = short_size
             oh = int(1.0 * h * ow / w)
         img = img.resize((ow, oh), Image.BILINEAR)
@@ -61,7 +61,7 @@ class SegmentationDataset(object):                           #包含数据增强
         x1 = int(round((w - outsize[1]) / 2.))
         y1 = int(round((h - outsize[0]) / 2.))
         img = img.crop((x1, y1, x1 + outsize[1], y1 + outsize[0]))
-        mask = mask.crop((x1, y1, x1 + outsize[1], y1 + outsize[0]))     #先重采样，再裁中间区域
+        mask = mask.crop((x1, y1, x1 + outsize[1], y1 + outsize[0]))
 
         # final transform
         img, mask = self._img_transform(img), self._mask_transform(mask)
@@ -71,10 +71,10 @@ class SegmentationDataset(object):                           #包含数据增强
         # random mirror
         if cfg.AUG.MIRROR and random.random() < 0.5:
             img = img.transpose(Image.FLIP_LEFT_RIGHT)
-            mask = mask.transpose(Image.FLIP_LEFT_RIGHT)       #水平翻转
+            mask = mask.transpose(Image.FLIP_LEFT_RIGHT)
         crop_size = self.crop_size
         # random scale (short edge)
-        short_size = random.randint(int(self.base_size * 0.5), int(self.base_size * 2.0))   #尺度缩放
+        short_size = random.randint(int(self.base_size * 0.5), int(self.base_size * 2.0))
         w, h = img.size
         if h > w:
             ow = short_size
@@ -88,7 +88,7 @@ class SegmentationDataset(object):                           #包含数据增强
         if short_size < min(crop_size):
             padh = crop_size[0] - oh if oh < crop_size[0] else 0
             padw = crop_size[1] - ow if ow < crop_size[1] else 0
-            img = ImageOps.expand(img, border=(0, 0, padw, padh), fill=0)   #https://www.it610.com/article/4838568.htm
+            img = ImageOps.expand(img, border=(0, 0, padw, padh), fill=0)
             mask = ImageOps.expand(mask, border=(0, 0, padw, padh), fill=-1)
         # random crop crop_size
         w, h = img.size

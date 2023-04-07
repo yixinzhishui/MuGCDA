@@ -88,8 +88,8 @@ cfg.TRAIN.PRETRAINED_MODEL_PATH = None #r''
 # use pretrained backbone model over imagenet
 cfg.TRAIN.BACKBONE_PRETRAINED = True
 # backbone pretrained model path, if not specific, will load from url when backbone pretrained enabled    tf-xception65-270e81cf.pth
-cfg.TRAIN.BACKBONE_PRETRAINED_PATH = r'/data_zs/data/pretrained_models/mit_b1.pth' # r'/data/Landcover/pretrain_pth/tf-xception65-270e81cf.pth' #r'E:\code\python\pytorch\my_code\Multi_models\SegmenTron-master\pretrain_pth\tf-xception65-270e81cf.pth'  #r'/data/CloudShadow/pretrain_pth/tf-xception65-270e81cf.pth'    #r'E:\code\python\pytorch\github_code\Multi_models\SegmenTron-master\pretrain_pth\deeplabv3_plus_xception_segmentron.pth'
-# resume model path                 #r'E:\code\python\pytorch\my_code\Multi_models\SegmenTron-master\pretrain_pth\tf-xception65-270e81cf.pth'   r'/data/NAIC/pretrain_pth/deeplabv3_plus_xception_segmentron.pth'
+cfg.TRAIN.BACKBONE_PRETRAINED_PATH = r'/data_zs/data/pretrained_models/mit_b1.pth'
+# resume model path
 #cfg.TRAIN.RESUME_MODEL_PATH = ''
 # whether to use synchronize bn
 cfg.TRAIN.SYNC_BATCH_NORM = True
@@ -106,7 +106,7 @@ cfg.VAL.ROOT_PATH = ''
 cfg.VAL.DATA_LIST = None
 ########################## test config ###########################################
 # val/test model path
-cfg.TEST.TEST_MODEL_PATH = r'' #r'E:\data\projects_and_topic\CloudShadow_detection\runs\checkpoints\DeepLabV3_Plus_xception65_cloudshadow_2021-01-29-13-12\best_checkpoint.pth.tar'    #E:\code\python\pytorch\my_code\Multi_models\SegmenTron-master\SegmenTron-master\tools\runs\checkpoints\DeepLabV3_Plus_xception65_cloudshadow_2021-01-29-10-42\29_checkpoint.pth.tar
+cfg.TEST.TEST_MODEL_PATH = r''
 # test batch size
 cfg.TEST.BATCH_SIZE = 1
 # eval crop size
@@ -267,12 +267,12 @@ cfg.MODEL.OCR.SCALE = 1
 
 ########################## visual config ###########################################
 # visual result output dir
-cfg.VISUAL.OUTPUT_DIR = r'../runs/visual/' #r'D:\Miscellaneous\picture'        #'../runs/visual/'
-cfg.VISUAL.MODEL_SAVE_DIR = r'tools/runs/checkpoints/' #r'/data/Landcover/SegmenTron-master/tools/runs/checkpoints/'  #'/data/CloudShadow/SegmenTron-master/tools/runs/checkpoints/'
+cfg.VISUAL.OUTPUT_DIR = r'../runs/visual/'
+cfg.VISUAL.MODEL_SAVE_DIR = r'tools/runs/checkpoints/'
 # log dir
-cfg.VISUAL.LOG_SAVE_DIR = 'tools/runs/logs'   #r'/data/CloudShadow/SegmenTron-master/tools/runs/logs/'        #runs/logs/
+cfg.VISUAL.LOG_SAVE_DIR = 'tools/runs/logs'
 cfg.VISUAL.CURRENT_NAME = ''
-#cfg.TRAIN.SUMMARYWRITER_SAVE_DIR = r'E:\code\python\pytorch\my_code\Multi_models\SegmenTron-master\SegmenTron-master\tools\runs\logs'
+
 
 cfg.UTILS.VAL_START = 0
 cfg.UTILS.EPOCH_STOP = 1000

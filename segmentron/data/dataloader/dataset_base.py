@@ -53,11 +53,11 @@ class SegmentationDataset(object):
             #A.RandomGamma(gamma_limit=46, p=0.5)
             # A.IAAPerspective(p=0.5),
 
-            # A.OneOf([
-            # A.HorizontalFlip(always_apply=True),
-            # A.VerticalFlip(always_apply=True),
-            # A.RandomRotate90(always_apply=True)
-            # ], p=0.75),
+            A.OneOf([
+            A.HorizontalFlip(always_apply=True),
+            A.VerticalFlip(always_apply=True),
+            A.RandomRotate90(always_apply=True)
+            ], p=0.75),
             # A.OneOf([
             #         A.IAAAdditiveGaussianNoise(),
             #         A.GaussNoise(),

@@ -26,7 +26,7 @@ class StrongVaihingenPotsdamDataset(SegmentationDataset):
 
         assert os.path.exists(self.root), "the root of dataset do not exist:{}".format(self.root)
         if data_list_root is None:
-            self.image_paths, self.mask_paths = self.get_pathList(self.root, self.split)  #r'/data/open_datasets/rsipac_semi_20000'  self.root
+            self.image_paths, self.mask_paths = self.get_pathList(self.root, self.split)
         else:
             self.image_paths, self.mask_paths = self.get_pathList_v4(self.root, data_list_root, self.split)
 
@@ -71,7 +71,7 @@ class StrongVaihingenPotsdamDataset(SegmentationDataset):
                 image = np.rollaxis(image, 0, 3)
         return image
 
-    # def readImage(self, dirname):   #rsipac的4波段tif影像读取时，gdal出现warning，暂用opencv读取
+    # def readImage(self, dirname):
     #
     #     image = cv2.imread(dirname, -1)
     #
@@ -79,7 +79,7 @@ class StrongVaihingenPotsdamDataset(SegmentationDataset):
 
     def __getitem__(self, item):
 
-        img = self.readImage(self.image_paths[item])   #[:, :, 0:3]--rsipac的4波段tif,读取其中3波段
+        img = self.readImage(self.image_paths[item])
         if self.mode == 'test':
             if self.transform is not None:
                 # img = self.ImageNormalize(img)
@@ -89,7 +89,7 @@ class StrongVaihingenPotsdamDataset(SegmentationDataset):
         mask = self.readImage(self.mask_paths[item])
 
         if self.mode == 'train':
-            sample = self.get_TrainAugmentation(0.7)(image=img.astype(np.uint8), mask=mask.astype(np.uint8))   #np.float32  np.uint8
+            sample = self.get_TrainAugmentation(0.7)(image=img.astype(np.uint8), mask=mask.astype(np.uint8))
             img, mask = sample['image'], sample['mask']
             sample_strong = self.get_StrongAugmentation(p=1)(image=img, mask=mask)
 
@@ -105,8 +105,8 @@ class StrongVaihingenPotsdamDataset(SegmentationDataset):
 
         if self.transform is not None:
             # img = self.ImageNormalize(img)
-            img = self.transform(img)   #.astype(np.uint8)与self.ImageNormalize不可同时出现
-        return img, mask, self.image_paths[item] #os.path.basename(self.image_paths[item])
+            img = self.transform(img)
+        return img, mask, self.image_paths[item]
 
     def __len__(self):
         return len(self.image_paths)
@@ -183,7 +183,7 @@ class StrongVaihingenPotsdamDataset(SegmentationDataset):
         mask_paths = []
 
         if split == 'train':
-            df = pandas.read_csv(dirname)   #https://blog.csdn.net/admiz/article/details/107065640
+            df = pandas.read_csv(dirname)
             for row in range(len(df)):
                 if int(df['fold'][row]) == 0:
                     dir_path = os.path.join(folder, df['name'][row])
@@ -196,7 +196,7 @@ class StrongVaihingenPotsdamDataset(SegmentationDataset):
                                 img_paths.append(img_path)
                                 mask_paths.append(mask_path)
         elif split == 'val':
-            df = pandas.read_csv(dirname)  # https://blog.csdn.net/admiz/article/details/107065640
+            df = pandas.read_csv(dirname)
             for row in range(len(df)):
                 if int(df['fold'][row]) == 0:
                     dir_path = os.path.join(folder, df['name'][row])
@@ -284,7 +284,7 @@ class StrongVaihingenPotsdamDataset(SegmentationDataset):
                     logging.info('Found {} images in the folder {}'.format(len(img_paths), img_folder))
                     return img_paths
 
-        if split in ['train', 'val', 'pesudo_train']:          #训练集划分：https://www.cnblogs.com/marsggbo/p/10496696.html   https://blog.csdn.net/l8947943/article/details/105623150
+        if split in ['train', 'val', 'pesudo_train']:
             img_folder = os.path.join(folder, 'images')  #split, 'images'
             mask_folder = os.path.join(folder, 'labels')  #split, 'labels'
             img_paths, mask_paths = get_pathPairs(img_folder, mask_folder)
@@ -315,7 +315,7 @@ class StrongVaihingenPotsdamDataset(SegmentationDataset):
             max = 255.0
         if min is None:
             min = 0
-        return ((image - min) / (max - min)).astype(np.float32)   #网络权重为torch.cuda.FloatTensor类型，输入网络的数据类型需与网络权重类型一致
+        return ((image - min) / (max - min)).astype(np.float32)
 
 if __name__ == '__main__':
     import cv2

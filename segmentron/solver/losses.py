@@ -10,7 +10,6 @@ from .lovasz_losses import lovasz_softmax
 
 
 class RKDLoss(nn.Module):
-    """Relational Knowledge Disitllation, CVPR2019"""
     def __init__(self, w_d=5, w_a=10):
         super(RKDLoss, self).__init__()
         self.w_d = w_d
@@ -32,17 +31,6 @@ class RKDLoss(nn.Module):
 
         loss_d = F.smooth_l1_loss(d, t_d)
 
-        # # RKD Angle loss
-        # with torch.no_grad():
-        #     td = (teacher.unsqueeze(0) - teacher.unsqueeze(1))    #td中的每一个元素代表论文中ti - tj
-        #     norm_td = F.normalize(td, p=2, dim=2)    #norm_td中的每一个元素代表论文中的eij, ekj
-        #     t_angle = torch.bmm(norm_td, norm_td.transpose(1, 2)).view(-1)   #https://blog.csdn.net/mimiduck/article/details/119797012?utm_medium=distribute.pc_aggpage_search_result.none-task-blog-2~aggregatepage~first_rank_ecpm_v1~rank_v31_ecpm-4-119797012.pc_agg_new_rank&utm_term=torch.bmm%28%29&spm=1000.2123.3001.4430    https://blog.csdn.net/qq_40178291/article/details/100302375
-        #
-        # sd = (student.unsqueeze(0) - student.unsqueeze(1))
-        # norm_sd = F.normalize(sd, p=2, dim=2)    #https://zhuanlan.zhihu.com/p/384026355
-        # s_angle = torch.bmm(norm_sd, norm_sd.transpose(1, 2)).view(-1)
-        #
-        # loss_a = F.smooth_l1_loss(s_angle, t_angle)   #https://pytorch.org/docs/1.2.0/nn.functional.html#torch.nn.functional.smooth_l1_loss
 
         loss = self.w_d * loss_d# + self.w_a * loss_a
 
@@ -51,14 +39,14 @@ class RKDLoss(nn.Module):
     @staticmethod
     def pdist(e, squared=False, eps=1e-12):
         e_square = e.pow(2).sum(dim=1)
-        prod = e @ e.t()    ## @矩阵乘法运算符 ：https://blog.csdn.net/haiziccc/article/details/101361583   #tensor.t()  矩阵转职置 https://blog.csdn.net/foneone/article/details/103876131
+        prod = e @ e.t()
         res = (e_square.unsqueeze(1) + e_square.unsqueeze(0) - 2 * prod).clamp(min=eps)     #x1^2 + x2^2 - 2 * x1 * x2
 
         if not squared:
             res = res.sqrt()
 
         res = res.clone()
-        res[range(len(e)), range(len(e))] = 0    #数组的对角线元素置为0（根据x1^2 + x2^2 - 2 * x1 * x2， 如果x1=x2, 对应位置res结果确实为0# ）
+        res[range(len(e)), range(len(e))] = 0
         return res
 
 
@@ -76,7 +64,7 @@ def make_one_hot(labels, classes):
     target = one_hot.scatter_(1, labels.data, 1)
     return target
 
-class DiceLoss(nn.Module):    #https://zhuanlan.zhihu.com/p/86704421
+class DiceLoss(nn.Module):
     def __init__(self, smooth=1., ignore_index=255):
         super(DiceLoss, self).__init__()
         self.ignore_index = ignore_index
@@ -108,7 +96,7 @@ class CE_DiceLoss(nn.Module):
         dice_loss = self.dice(output, target)
         return CE_loss + dice_loss
 
-class FocalLoss(nn.Module):     #https://www.cnblogs.com/king-lps/p/9497836.html
+class FocalLoss(nn.Module):
     def __init__(self, gamma=2, alpha=None, ignore_index=255, size_average=True):
         super(FocalLoss, self).__init__()
         self.gamma = gamma
@@ -152,7 +140,7 @@ class CrossEntroy2d(nn.Module):
         output = output.transpose(1, 2).transpose(2, 3).contiguous()
         output = output[target_mask.view(n, h, w, 1).repeat(1, 1, 1, c)].view(-1, c)
 
-        return dict(loss=self.ce_loss(output, target))    #output(NxC)  target(N)    C是类别数量  https://pytorch-cn.readthedocs.io/zh/latest/package_references/torch-nn/#class-torchnncrossentropylossweightnone-size_averagetruesource
+        return dict(loss=self.ce_loss(output, target))
 
 
 def cross_entropy(pred,
@@ -351,6 +339,7 @@ def mask_cross_entropy(pred,
     return F.binary_cross_entropy_with_logits(
         pred_slice, target, weight=class_weight, reduction='mean')[None]
 
+
 class CrossEntropyLoss(nn.Module):
     """CrossEntropyLoss.
 
@@ -426,6 +415,16 @@ def kd_loss(logits_student, logits_teacher):
 #
 #     return loss_kd
 
+
+class BCELoss(nn.Module):
+    def __init__(self):
+        super(BCELoss, self).__init__()
+        pass
+
+    def forward(self, pred, label):
+        loss = F.binary_cross_entropy_with_logits(pred, label)
+        return loss
+
 def get_segmentation_losses(loss_name, **kwargs):
     #if cfg.SOLVER.LOSS_NAME == "ce_pseudo":
     # return CrossEntroy2d(**kwargs)
@@ -433,5 +432,6 @@ def get_segmentation_losses(loss_name, **kwargs):
         return CrossEntropyLoss(**kwargs)
     elif loss_name == 'rkd_loss':
         return RKDLoss()
-
+    elif loss_name == 'bce_loss':
+        return BCELoss()
     return None

@@ -8,7 +8,6 @@ import torch.nn.functional as F
 
 from torch.autograd import Variable
 from .lovasz_losses import lovasz_softmax
-from ..models.pointrend import point_sample
 from ..data.dataloader import datasets
 from ..config import cfg
 import segmentron.solver.smp_losses as smp_loss
@@ -21,31 +20,31 @@ LOSS_REGISTRY = Registry("LOSS")
 # __all__ = ['get_segmentation_loss']
 
 
-# 函数形式参数：类型提示、类型标注、类型注释：Optional、Union:   https://blog.csdn.net/xjcoolice/article/details/108004133
+
 
 @LOSS_REGISTRY.register(name='ce_loss')
 class MixSoftmaxCrossEntropyLoss(nn.CrossEntropyLoss):
-    def __init__(self, aux=True, aux_weight=0.4, ignore_index=255, **kwargs):   #ignore_index=-1
+    def __init__(self, aux=True, aux_weight=0.4, ignore_index=255, **kwargs):
         super(MixSoftmaxCrossEntropyLoss, self).__init__(ignore_index=ignore_index)
         self.aux = aux
         self.aux_weight = aux_weight
 
     def _aux_forward(self, *inputs, **kwargs):
         *preds, target = tuple(
-            inputs)  # 模型可能有多个输出 #https://blog.csdn.net/yilovexing/article/details/80577510    序列解包：https://blog.csdn.net/yilovexing/article/details/80576788
+            inputs)
 
         loss = super(MixSoftmaxCrossEntropyLoss, self).forward(preds[0],
-                                                               target)  # super()单继承与多继承：https://www.jianshu.com/p/8ddb595628d1  调取父类
+                                                               target)
         for i in range(1, len(preds)):
             aux_loss = super(MixSoftmaxCrossEntropyLoss, self).forward(preds[i], target)
-            loss += self.aux_weight * aux_loss  # 加权重
+            loss += self.aux_weight * aux_loss
         return loss
 
     def _multiple_forward(self, *inputs):
         *preds, target = tuple(inputs)
         loss = super(MixSoftmaxCrossEntropyLoss, self).forward(preds[0], target)
         for i in range(1, len(preds)):
-            loss += super(MixSoftmaxCrossEntropyLoss, self).forward(preds[i], target)  # 不加权重
+            loss += super(MixSoftmaxCrossEntropyLoss, self).forward(preds[i], target)
         return loss
 
     def forward(self, *inputs, **kwargs):
@@ -57,11 +56,11 @@ class MixSoftmaxCrossEntropyLoss(nn.CrossEntropyLoss):
             inputs = tuple([preds, target])
 
         if self.aux:
-            return dict(loss=self._aux_forward(*inputs))  # 模型多输出，权重相加
+            return dict(loss=self._aux_forward(*inputs))
         elif len(preds) > 1:
-            return dict(loss=self._multiple_forward(*inputs))  # 模型多输出，直接相加
+            return dict(loss=self._multiple_forward(*inputs))
         else:
-            return dict(loss=super(MixSoftmaxCrossEntropyLoss, self).forward(*inputs))  # 模型只有一个输出，即len(preds)=1时
+            return dict(loss=super(MixSoftmaxCrossEntropyLoss, self).forward(*inputs))
 
 
 @LOSS_REGISTRY.register(name='sce_loss')
@@ -86,7 +85,7 @@ class SCE_Loss(nn.Module):
 
     def forward(self, inputs, targets):
         loss = self.rce_alpha * self.ce_loss(inputs, targets) + self.rce_beta * self.rce(inputs,
-                                                                                         targets.clone())  # 需加.clone()，否则报错RuntimeError: one of the variables needed for gradient computation has been modified by an inplace operation
+                                                                                         targets.clone())
 
         return dict(loss=loss)
 
@@ -104,7 +103,7 @@ class ImageBasedCrossEntropyLoss2d(nn.Module):
         logging.info("Using Per Image based weighted loss")
         self.num_classes = classes
         self.nll_loss = nn.NLLLoss(weight, size_average,
-                                   ignore_index)  # https://pytorch-cn.readthedocs.io/zh/latest/package_references/torch-nn/#class-torchnnnllloss2dweightnone-size_averagetruesource   https://blog.csdn.net/Jeremy_lf/article/details/102725285?utm_medium=distribute.pc_relevant.none-task-blog-baidujs_title-0&spm=1001.2101.3001.4242
+                                   ignore_index)
         self.norm = norm
         self.upper_bound = upper_bound
         self.batch_weights = batch_weights
@@ -114,7 +113,7 @@ class ImageBasedCrossEntropyLoss2d(nn.Module):
         Calculate weights of classes based on the training crop
         """
         hist = np.histogram(target.flatten(), range(
-            self.num_classes + 1))[0]  # https://vimsky.com/examples/usage/python-numpy.histogram.html
+            self.num_classes + 1))[0]
         if self.norm:
             hist = ((hist != 0) * self.upper_bound * (1 / (hist + 1))) + 1
         else:
@@ -164,7 +163,6 @@ class ICNetLoss(nn.CrossEntropyLoss):
         return dict(loss=loss1 + loss2 * self.aux_weight + loss3 * self.aux_weight)
 
 
-# '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''#
 
 class PixelContrastLoss(nn.Module):
     def __init__(self, temperature=0.07, base_temperature=0.07, max_samples=1024, max_views=11, ignore_index=0):
@@ -326,8 +324,6 @@ class BCE_SCE_Contrast(nn.Module):
         return dict(loss=loss)
 
 
-# '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''#
-
 
 @LOSS_REGISTRY.register(name='ohem_ce_loss')
 class OhemCrossEntropy2d(nn.Module):
@@ -348,7 +344,7 @@ class OhemCrossEntropy2d(nn.Module):
     def forward(self, pred, target):
         n, c, h, w = pred.size()
         target = target.view(-1)
-        valid_mask = target.ne(self.ignore_index)  # ne:https://blog.csdn.net/flyfish1986/article/details/106388548/
+        valid_mask = target.ne(self.ignore_index)
         target = target * valid_mask.long()
         num_valid = valid_mask.sum()
 
@@ -360,11 +356,11 @@ class OhemCrossEntropy2d(nn.Module):
         elif num_valid > 0:
             # prob = prob.masked_fill_(1 - valid_mask, 1)
             prob = prob.masked_fill_(~valid_mask,
-                                     1)  # https://blog.csdn.net/qq_41568188/article/details/107281395  #忽略值处，概率直接设为1
+                                     1)
             mask_prob = prob[target, torch.arange(len(target), dtype=torch.long)]
             threshold = self.thresh
             if self.min_kept > 0:
-                index = mask_prob.argsort()  # argsort()：https://blog.csdn.net/fengzhongluoleidehua/article/details/79873582
+                index = mask_prob.argsort()
                 threshold_index = index[min(len(index), self.min_kept) - 1]
                 if mask_prob[threshold_index] > self.thresh:
                     threshold = mask_prob[threshold_index]
@@ -463,7 +459,7 @@ class MixSoftmaxCrossEntropyOHEMLoss(OhemCrossEntropy2d):
 
 @LOSS_REGISTRY.register(name='lovasz_softmax')
 class LovaszSoftmax(
-    nn.Module):  # https://blog.csdn.net/gbz3300255/article/details/108140850?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.vipsorttest&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.vipsorttest
+    nn.Module):
     def __init__(self, aux=True, aux_weight=0.2, ignore_index=-1, **kwargs):
         super(LovaszSoftmax, self).__init__()
         self.aux = aux
@@ -499,7 +495,7 @@ class LovaszSoftmax(
 
 @LOSS_REGISTRY.register(name='focal_loss')
 class FocalLoss(
-    nn.Module):  # FocalLoss代码讲解：https://blog.csdn.net/qq_34914551/article/details/105393989?utm_medium=distribute.pc_relevant.none-task-blog-baidujs_title-6&spm=1001.2101.3001.4242    permute：https://www.cnblogs.com/yqpy/p/12459519.html
+    nn.Module):
     def __init__(self, alpha=0.5, gamma=2, weight=None, aux=True, aux_weight=0.2, ignore_index=-1,
                  size_average=True):
         super().__init__()
@@ -527,7 +523,7 @@ class FocalLoss(
             output = output.contiguous().view(output.size(0), output.size(1), -1)
             output = output.transpose(1, 2)
             output = output.contiguous().view(-1, output.size(
-                2)).squeeze()  # 此代码维度变换更简单：https://blog.csdn.net/qq_34914551/article/details/105393989?utm_medium=distribute.pc_relevant.none-task-blog-baidujs_title-6&spm=1001.2101.3001.4242
+                2)).squeeze()
         if target.dim() == 4:
             target = target.contiguous().view(target.size(0), target.size(1), -1)
             target = target.transpose(1, 2)
@@ -633,7 +629,7 @@ class DiceLoss(nn.Module):
         *preds, target = tuple(inputs)
         valid_mask = (target != self.ignore_index).long()
         num_classes = preds[0].shape[1]
-        # target_one_hot = F.one_hot(torch.clamp_min(target, 0))    #忽略值为255时会有问题
+
         target_one_hot = F.one_hot(torch.clamp(target.long(), 0, num_classes - 1), num_classes=num_classes)
         loss = self._base_forward(preds[0], target_one_hot, valid_mask)
         for i in range(1, len(preds)):
@@ -685,23 +681,6 @@ class Ohem_FocalLoss(nn.Module):
         loss_focal = self.focal_loss(preds, target)['loss']
 
         return dict(loss=(0.5 * loss_ohem + 0.5 * loss_focal))
-"""调用DiceLoss()，运行明显变慢，换一种DiceLoss()的实现方式"""
-# @LOSS_REGISTRY.register(name='ce_focal_diceloss')
-# class CE_Focal_DiceLoss(nn.Module):
-#     def __init__(self, **kwargs):
-#         super(CE_Focal_DiceLoss, self).__init__()
-#         self.ce_loss = MixSoftmaxCrossEntropyLoss()
-#         self.focal_loss = FocalLoss()
-#         self.dice_loss = DiceLoss()
-#
-#     def forward(self, *inputs, **kwargs):
-#         preds, target = tuple(inputs)
-#
-#         loss_ce = self.ce_loss(preds, target)['loss']
-#         loss_focal = self.focal_loss(preds, target)['loss']
-#         loss_dice = self.dice_loss(preds, target)['loss']
-#
-#         return dict(loss=0.5 * loss_ce + 0.3 * loss_focal + 0.2 * loss_dice)
 
 @LOSS_REGISTRY.register(name='ce_focal_diceloss')
 class CE_Focal_DiceLoss(nn.Module):
@@ -732,39 +711,8 @@ class BinaryDice_FocalLoss(nn.Module):
     def forward(self, *inputs, **kwargs):
         preds, target = tuple(inputs)
 
-        # if isinstance(preds, (list, tuple)):
-        #     inputs = tuple(list(preds) + [target])
-        # else:
-        #     inputs = tuple([preds, target])
-        #dice_loss = self.binary_dice_loss(preds, target)
-        return dict(loss=self.bce_loss(preds, target) + self.binary_dice_loss(preds, target))    #self.binary_dice_loss(preds, target)["loss"] +
 
-
-@LOSS_REGISTRY.register(name='point_rend_loss')
-class PointRendLoss(nn.CrossEntropyLoss):
-    def __init__(self, aux=True, aux_weight=0.2, ignore_index=-1, **kwargs):
-        super(PointRendLoss, self).__init__(ignore_index=ignore_index)
-        self.aux = aux
-        self.aux_weight = aux_weight
-        self.ignore_index = ignore_index
-
-    def forward(self, *inputs, **kwargs):
-        result, gt = tuple(inputs)
-
-        pred = F.interpolate(result["coarse"], gt.shape[-2:], mode="bilinear", align_corners=True)
-        seg_loss = F.cross_entropy(pred, gt, ignore_index=self.ignore_index)
-
-        gt_points = point_sample(
-            gt.float().unsqueeze(1),
-            result["points"],
-            mode="nearest",
-            align_corners=False
-        ).squeeze_(1).long()
-        points_loss = F.cross_entropy(result["rend"], gt_points, ignore_index=self.ignore_index)
-
-        loss = seg_loss + points_loss
-
-        return dict(loss=loss)
+        return dict(loss=self.bce_loss(preds, target) + self.binary_dice_loss(preds, target))
 
 
 @LOSS_REGISTRY.register(name='compose_loss')
@@ -786,38 +734,6 @@ class ComposeLoss(nn.Module):
 
         return dict(loss=loss)
 
-# def get_segmentation_loss(model, use_ohem=False, **kwargs):
-#     if use_ohem:
-#         return MixSoftmaxCrossEntropyOHEMLoss(**kwargs)
-#     elif cfg.SOLVER.LOSS_NAME == 'lovasz':
-#         logging.info('Use lovasz loss!')
-#         return LovaszSoftmax(**kwargs)
-#     elif cfg.SOLVER.LOSS_NAME == 'focal':
-#         logging.info('Use focal loss!')
-#         return FocalLoss(**kwargs)
-#     elif cfg.SOLVER.LOSS_NAME == 'dice':
-#         logging.info('Use dice loss!')
-#         return DiceLoss(**kwargs)
-#     elif cfg.SOLVER.LOSS_NAME == 'pixelcontrast':
-#         return BCE_SCE_Contrast(**kwargs)
-#     elif cfg.SOLVER.LOSS_NAME == "focal_diceloss":
-#         return BinaryDice_FocalLoss(**kwargs)
-#     elif cfg.SOLVER.LOSS_NAME == "imagebase_CEloss":
-#         return ImageBasedCrossEntropyLoss2d(**kwargs)
-#     elif cfg.SOLVER.LOSS_NAME == "sce_loss":
-#         return SCE_Loss(**kwargs)
-#     elif cfg.SOLVER.LOSS_NAME == "compose_loss":
-#         return ComposeLoss(**kwargs)
-#     model = model.lower()
-#     if model == 'icnet':
-#         return ICNetLoss(**kwargs)
-#     elif model == 'encnet':
-#         return EncNetLoss(**kwargs)
-#     elif model == 'pointrend':
-#         logging.info('Use pointrend loss!')
-#         return PointRendLoss(**kwargs)
-#     else:
-#         return MixSoftmaxCrossEntropyLoss(**kwargs)
 
 
 def get_segmentation_loss(model, use_ohem=False, **kwargs):

@@ -97,22 +97,22 @@ class Attention(nn.Module):
 
     def forward(self, x, H, W):
         B, N, C = x.shape
-        q = self.q(x).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)  #q.shape--torch.Size([2, 1, 16384, 64]),,self.q(x)之后为BNxC，再rashape为BxNxC
+        q = self.q(x).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
 
         if self.sr_ratio > 1:
-            x_ = x.permute(0, 2, 1).reshape(B, C, H, W)    #reshape为可卷积的4维，self.sr(x_)以卷积核为4，步长为4进行卷积
+            x_ = x.permute(0, 2, 1).reshape(B, C, H, W)
             x_ = self.sr(x_).reshape(B, C, -1).permute(0, 2, 1)
             x_ = self.norm(x_)
-            kv = self.kv(x_).reshape(B, -1, 2, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)  #self.kv(x_)---通道层C由dim线性扩展到2xdim  #kv.shape:torch.Size([2, 2, 1, 256, 64])
+            kv = self.kv(x_).reshape(B, -1, 2, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
         else:
             kv = self.kv(x).reshape(B, -1, 2, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
         k, v = kv[0], kv[1]   #k, v.shape ----[2, 1, 256, 64]
 
-        attn = (q @ k.transpose(-2, -1)) * self.scale  #@矩阵计算：https://blog.csdn.net/beauthy/article/details/121103704  q @ k.transpose(-2, -1)----[2, 1, 16384, 64] @ [2, 1, 64, 256]   #attn.shape---torch.Size([2, 1, 16384, 256])
+        attn = (q @ k.transpose(-2, -1)) * self.scale
         attn = attn.softmax(dim=-1)   #attn.shape:torch.Size([2, 1, 16384, 256])
         attn = self.attn_drop(attn)   ##attn.shape:torch.Size([2, 1, 16384, 256])
 
-        x = (attn @ v).transpose(1, 2).reshape(B, N, C)   #attn @ v--shape:[2, 1, 16384, 64],,,transpose后[2, 1, 64, 16384]   x.shape:torch.Size([2, 16384, 64])
+        x = (attn @ v).transpose(1, 2).reshape(B, N, C)
         x = self.proj(x)
         x = self.proj_drop(x)
 
@@ -153,8 +153,8 @@ class Block(nn.Module):
                 m.bias.data.zero_()
 
     def forward(self, x, H, W):
-        x = x + self.drop_path(self.attn(self.norm1(x), H, W))   #self.attn之后xshape不变  x.shape:torch.Size([2, 16384, 64])
-        x = x + self.drop_path(self.mlp(self.norm2(x), H, W))    #x.shape:torch.Size([2, 16384, 64])
+        x = x + self.drop_path(self.attn(self.norm1(x), H, W))
+        x = x + self.drop_path(self.mlp(self.norm2(x), H, W))
 
         return x
 
@@ -174,7 +174,7 @@ class OverlapPatchEmbed(nn.Module):
         self.num_patches = self.H * self.W
         self.proj = nn.Conv2d(in_chans, embed_dim, kernel_size=patch_size, stride=stride,
                               padding=(patch_size[0] // 2, patch_size[1] // 2))
-        self.norm = nn.LayerNorm(embed_dim)   #nn.BatchNorm  nn.LayerNorm  nn.GroupNorm:https://zhuanlan.zhihu.com/p/395855181   nn.BatchNorm--根计算数据集的均值和方差一样
+        self.norm = nn.LayerNorm(embed_dim)
 
         self.apply(self._init_weights)
 
@@ -195,8 +195,8 @@ class OverlapPatchEmbed(nn.Module):
 
     def forward(self, x):
         x = self.proj(x)
-        _, _, H, W = x.shape  #_:64  H:128  W:128
-        x = x.flatten(2).transpose(1, 2)   #x.shape---torch.Size([2, 16384, 64])  #Bx(HW)xC
+        _, _, H, W = x.shape
+        x = x.flatten(2).transpose(1, 2)
         x = self.norm(x)
 
         return x, H, W
@@ -223,7 +223,7 @@ class MixVisionTransformer(nn.Module):
                                               embed_dim=embed_dims[3])
 
         # transformer encoder
-        dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]  # stochastic depth decay rule  #torch.linspace：https://zhuanlan.zhihu.com/p/114663117
+        dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]
         cur = 0
         self.block1 = nn.ModuleList([Block(
             dim=embed_dims[0], num_heads=num_heads[0], mlp_ratio=mlp_ratios[0], qkv_bias=qkv_bias, qk_scale=qk_scale,
@@ -320,9 +320,9 @@ class MixVisionTransformer(nn.Module):
         # stage 1
         x, H, W = self.patch_embed1(x)
         for i, blk in enumerate(self.block1):
-            x = blk(x, H, W)   #blk后x的shape不变
+            x = blk(x, H, W)
         x = self.norm1(x)
-        x = x.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()   #reshape为可卷积的4维：BxCXHxW  C即为相应embed_dims[*], H,W即为相应self.patch_embed*中的img_size值   x.shape:torch.Size([2, 64, 128, 128])
+        x = x.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
         outs.append(x)
 
         # stage 2
@@ -330,7 +330,7 @@ class MixVisionTransformer(nn.Module):
         for i, blk in enumerate(self.block2):
             x = blk(x, H, W)
         x = self.norm2(x)
-        x = x.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()   #x.shape:torch.Size([2, 128, 64, 64])
+        x = x.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
         outs.append(x)
 
         # stage 3
@@ -338,7 +338,7 @@ class MixVisionTransformer(nn.Module):
         for i, blk in enumerate(self.block3):
             x = blk(x, H, W)
         x = self.norm3(x)
-        x = x.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()   #x.shape:torch.Size([2, 320, 32, 32])
+        x = x.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
         outs.append(x)
 
         # stage 4
@@ -346,7 +346,7 @@ class MixVisionTransformer(nn.Module):
         for i, blk in enumerate(self.block4):
             x = blk(x, H, W)
         x = self.norm4(x)
-        x = x.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()   #x.shape:torch.Size([2, 512, 16, 16])
+        x = x.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
         outs.append(x)
 
         return outs

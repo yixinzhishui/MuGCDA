@@ -1,5 +1,3 @@
-# 2020年了，语义分割还有哪些方向可以研究：https://mp.weixin.qq.com/s?__biz=MjM5MjgwNzcxOA==&mid=2247483875&idx=1&sn=3f378bffca754486d7552147898b3763&chksm=a6a1efaa91d666bc77c529286692634ef73d4340e7e6cc4609dcd056ea92777c6eda69a44e51&token=1209743408&lang=zh_CN#rd
-# 弱监督语义分割综述：https://mp.weixin.qq.com/s?__biz=MjM5MjgwNzcxOA==&mid=2247483709&idx=1&sn=b7ff5fd12945d0626370abec6821bb3c&chksm=a6a1ef7491d66662c6b0f7e1783e77924f4c85941f7f1452d43649c6bd63ad0fe7b766227b4b&scene=21#wechat_redirect
 import time
 import copy
 import datetime
@@ -9,9 +7,9 @@ import csv
 
 # from tensorboardX import SummaryWriter
 
-cur_path = os.path.abspath(os.path.dirname(__file__))  # https://www.cnblogs.com/joldy/p/6144813.html
+cur_path = os.path.abspath(os.path.dirname(__file__))
 root_path = os.path.split(cur_path)[0]
-sys.path.append(root_path)  # sys.path.append:https://blog.csdn.net/zxyhhjs2017/article/details/80582246?utm_medium=distribute.pc_relevant.none-task-blog-title-3&spm=1001.2101.3001.4242
+sys.path.append(root_path)
 
 import logging
 import torch
@@ -20,7 +18,7 @@ import numpy as np
 import torch.utils.data as data
 import torch.nn.functional as F
 from matplotlib import pyplot as plt
-from torch.cuda.amp import autocast   #https://zhuanlan.zhihu.com/p/165152789
+from torch.cuda.amp import autocast
 from torch.cuda.amp import GradScaler
 
 from torchvision import transforms
@@ -52,7 +50,7 @@ class Trainer(object):
         input_transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize(cfg.DATASET.MEAN, cfg.DATASET.STD),
-            # 数据归一化的原因：https://blog.csdn.net/qq_38765642/article/details/109779370  归一化与反归一化：https://blog.csdn.net/qq_38929105/article/details/106733564?utm_medium=distribute.pc_relevant.none-task-blog-searchFromBaidu-1.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-searchFromBaidu-1.control
+
         ])
         # dataset and dataloader
         data_kwargs = {'transform': input_transform, 'base_size': cfg.TRAIN.BASE_SIZE,
@@ -137,14 +135,7 @@ class Trainer(object):
         elif args.distributed and cfg.TRAIN.SYNC_BATCH_NORM:
             self.model = nn.SyncBatchNorm.convert_sync_batchnorm(self.model)  # https://pytorch.org/docs/master/generated/torch.nn.SyncBatchNorm.html
             self.ema_model = nn.SyncBatchNorm.convert_sync_batchnorm(self.ema_model)
-            """
-             同步批处理标准PyTorch
-             PyTorch中的同步批处理规范化实现。
-             此模块与内置的PyTorch BatchNorm不同，因为在训练过程中所有设备的均值和标准差都减小了。
-             例如，当在训练期间使用nn.DataParallel封装网络时，PyTorch的实现仅使用该设备上的统计信息对每个设备上的张量进行归一化，这加快了计算速度，并且易于实现，但统计信息可能不准确。 相反，在此同步版本中，将对分布在多个设备上的所有训练样本进行统计。
-             请注意，对于单GPU或仅CPU的情况，此模块的行为与内置的PyTorch实现完全相同。
-             该模块目前仅是用于研究用途的原型版本。 如下所述，它有其局限性，甚至可能会遇到一些设计问题。
-            """
+
             logging.info('SyncBatchNorm is effective!')
         else:
             logging.info('Not use SyncBatchNorm!')
@@ -170,7 +161,6 @@ class Trainer(object):
         if cfg.TRAIN.MODEL_SCALE > 1:
             self.model = SegmentationScale(self.model, float(cfg.TRAIN.MODEL_SCALE))
             self.ema_model = SegmentationScale(self.ema_model, float(cfg.TRAIN.MODEL_SCALE))
-            print("--------------------------model scale:{}".format(cfg.TRAIN.MODEL_SCALE))
 
         # resume checkpoint if needed
         self.model, self.optimizer, self.lr_scheduler, self.scaler, self.start_epoch = load_model_resume(self.model,
@@ -181,10 +171,9 @@ class Trainer(object):
 
         if cfg.TRAIN_STEP_ADD:
             cfg.__setattr__("UTILS.EPOCH_STOP", self.start_epoch + 7)
-        print("--------------------------epoch stop:{}".format(cfg.UTILS.EPOCH_STOP))
 
 
-        if args.distributed:  # 使用PyTorch编写分布式应用程序：https://github.com/apachecn/pytorch-doc-zh/blob/master/docs/1.0/dist_tuto.md     #https://oldpan.me/archives/pytorch-to-use-multiple-gpus   #https://zhuanlan.zhihu.com/p/76638962?utm_source=wechat_session
+        if args.distributed:
             self.model = nn.parallel.DistributedDataParallel(self.model, device_ids=[args.local_rank],
                                                              output_device=args.local_rank,
                                                              find_unused_parameters=True)
@@ -218,8 +207,8 @@ class Trainer(object):
             epoch = iteration // iters_per_epoch
 
             images = images.to(self.device)
-            targets = targets.long().to(self.device)  # targets = targets.to(self.device)  损失函数输入需为Long型
-            # targets = targets.float().to(self.device)  # targets = targets.to(self.device)  单分类损失函数损失函数输入需为Float型
+            targets = targets.long().to(self.device)  # targets = targets.to(self.device)
+
             batch_size = images.shape[0]
             means = torch.as_tensor([0.5, 0.5, 0.5]).view(1, 3, 1, 1).repeat(batch_size, 1, 1, 1).to(self.device)
             stds = torch.as_tensor([0.5, 0.5, 0.5]).view(1, 3, 1, 1).repeat(batch_size, 1, 1, 1).to(self.device)
@@ -287,7 +276,7 @@ class Trainer(object):
             outputs_sample_stu = torch.softmax(outputs_pesudo, dim=1).mean(dim=2).mean(dim=2)
             loss_sample = self.criterion_sample(outputs_sample_stu, outputs_sample_tea)
 
-            losses_pesudo = loss_pixel * 0.9 + loss_sample * 0.1
+            losses_pesudo = loss_pixel + loss_sample * 0.1
             losses_pesudo.backward()
 
             loss_dict_pixel_reduced = reduce_loss_dict(dict(loss=loss_pixel))
@@ -321,9 +310,9 @@ class Trainer(object):
                                          self.optimizer.param_groups[0]['lr']])  # losses_reduced.item()
 
                 # self.SummaryWriter.add_scalar("train-loss", losses_reduced.item(), (epoch - 1) * iters_per_epoch + iteration)
-                # self.SummaryWriter.add_scalar("train-lr", self.optimizer.param_groups[0]['lr'], (epoch - 1) * iters_per_epoch + iteration)    #SummaryWriter封装使用：https://www.cnblogs.com/chengebigdata/p/10121109.html    #tensorboard 平滑损失曲线代码:https://blog.csdn.net/charel_chen/article/details/80364841
+                # self.SummaryWriter.add_scalar("train-lr", self.optimizer.param_groups[0]['lr'], (epoch - 1) * iters_per_epoch + iteration)
                 # self.SummaryWriter.add_scalars("train", {"loss": losses_reduced.item(), "lr":self.optimizer.param_groups[0]['lr']}, (epoch - 1) * iters_per_epoch + iteration)
-                # self.SummaryWriter.close()          #self.SummaryWriter.close()：tensorboard生成文件大小0KB：https://blog.csdn.net/york1996/article/details/103898325    #动态查看：https://blog.csdn.net/weixin_38709804/article/details/103922830
+                # self.SummaryWriter.close()
 
                 # self.SummaryWriter.close()
             if not self.args.skip_val and iteration % val_per_iters == 0:
@@ -338,10 +327,7 @@ class Trainer(object):
                 os.makedirs(out_dir, exist_ok=True)
                 vis_img = torch.clamp(denorm(images, means, stds), 0, 1)
                 vis_trg_img = torch.clamp(denorm(images_pesudo, means, stds), 0, 1)
-                # print('vis_img:{}'.format(vis_img.shape))
-                # print('vis_trg_img:{}'.format(vis_trg_img.shape))
-                # print('vis_mixed_img:{}'.format(vis_mixed_img.shape))
-                import cv2
+
 
                 for j in range(batch_size):
                     vis_img_cv = np.rollaxis((vis_img[j] * 255).cpu().data.numpy().astype(np.uint8), 0, 3)[:, :, ::-1]
@@ -350,16 +336,6 @@ class Trainer(object):
                     vis_pseudo_cv = self.decode_segmap(pseudo_label[j].cpu().data.numpy().astype(np.uint8))[:, :, ::-1]
                     vis_weight_cv = (pseudo_weight[j] * 255).cpu().data.numpy().astype(np.uint8)
 
-
-                    # vis_mixed_img_cv = np.rollaxis((vis_mixed_img[j] * 255).cpu().data.numpy().astype(np.uint8), 0, 3)
-                    # filname = os.path.basename(_files[j])[:-4]
-                    # cv2.imwrite(os.path.join(out_dir, f'{(iteration + 1):06d}_{j}_source_img_{filname}.tif'), vis_img_cv)
-                    # cv2.imwrite(os.path.join(out_dir, f'{(iteration + 1):06d}_{j}_target_img_{filname}.tif'), vis_trg_img_cv)
-                    # cv2.imwrite(os.path.join(out_dir, f'{(iteration + 1):06d}_{j}_source_gt_img_{filname}.tif'), vis_target_cv)
-                    # cv2.imwrite(os.path.join(out_dir, f'{(iteration + 1):06d}_{j}_target_pseudo_img_{filname}.tif'), vis_pseudo_cv)
-                    # cv2.imwrite(os.path.join(out_dir, f'{(iteration + 1):06d}_{j}_target_weight_img_{filname}.tif'), vis_weight_cv)
-
-                    # Write_Image(os.path.join(out_dir, f'{(iteration + 1):06d}_{j}_mixed_img_{filname}.tif'), mixed_img[j].cpu().data.numpy())
                     rows, cols = 2, 4
                     fig, axs = plt.subplots(
                         rows,
@@ -448,9 +424,6 @@ class Trainer(object):
                 "[EVAL] Sample: {:d}, pixAcc: {:.3f}, FWIoU: {:.3f}, IOU: {}".format(i + 1, pixAcc * 100, mIoU * 100,
                                                                                      category_iou))
 
-            # with open(os.path.join(cfg.VISUAL.LOG_SAVE_DIR, 'valid_log', 'valid_log.csv'), 'a') as f:
-            #     csv_writer = csv.writer(f)
-            #     csv_writer.writerow([epoch, pixAcc * 100, mIoU * 100])
 
         pixAcc, mIoU = self.metric.get()
         with open(
@@ -502,13 +475,5 @@ if __name__ == '__main__':
 
     # setup python train environment, logger, seed..
     default_setup(args)
-    # debug = args.device
-    # debug_2 = args.num_gpus
-    # create a trainer and start train
     trainer = Trainer(args)
     trainer.train()
-
-# ssh远程pycharm配置：https://blog.csdn.net/hesongzefairy/article/details/96276263
-# https://blog.csdn.net/Alina_M/article/details/105901297?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.control
-
-# CUDA_VISIBLE_DEVICES=0,1 python -m torch.distributed.launch --nproc_per_node 2 tools/train.py   #https://blog.csdn.net/andrew80/article/details/89189544

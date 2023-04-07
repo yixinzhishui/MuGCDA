@@ -157,10 +157,10 @@ class SegmentationMetric(object):
         f1_class, fl_mean = self.F1_score()
         precision_class = self.pixel_precision()
         recall_class = self.pixel_recall()
-        # if return_category_iou:
-        #     return pixAcc, mIoU, IoU.cpu().numpy(), pixAcc_class.cpu().numpy() #f1_class.cpu().numpy()        #pixAcc_class.cpu().numpy()
         if return_category_iou:
-            return pixAcc, mIoU, IoU.cpu().numpy(), precision_class.cpu().numpy(), recall_class.cpu().numpy(), f1_class.cpu().numpy(),
+            return pixAcc, mIoU, IoU.cpu().numpy(), pixAcc_class.cpu().numpy() #f1_class.cpu().numpy()        #pixAcc_class.cpu().numpy()
+        # if return_category_iou:
+        #     return pixAcc, mIoU, IoU.cpu().numpy(), precision_class.cpu().numpy(), recall_class.cpu().numpy(), f1_class.cpu().numpy(),
         return pixAcc, mIoU
 
     def reset(self):

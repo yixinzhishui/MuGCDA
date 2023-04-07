@@ -42,16 +42,13 @@ class Evaluator(object):
 
         # dataset and dataloader
         test_dataset = get_segmentation_dataset(cfg.DATASET.NAME, split='test', mode='test', transform=input_transform)
-        #val_dataset = get_segmentation_dataset(cfg.DATASET.NAME, data_list_root=cfg.DATASET.DATA_LIST, split='val', mode='testval', transform=input_transform)
+
         test_sampler = make_data_sampler(test_dataset, False, args.distributed)
         test_batch_sampler = make_batch_data_sampler(test_sampler, images_per_batch=cfg.TEST.BATCH_SIZE, drop_last=False)
         self.test_loader = data.DataLoader(dataset=test_dataset,
                                           batch_sampler=test_batch_sampler,
                                           num_workers=cfg.DATASET.WORKERS,
                                           pin_memory=True)
-        #self.classes = val_dataset.NUM_CLASS    #NUM_CLASS    val_dataset.classes
-        #self.classes = ["湿地", "耕地", "种植园用地", "林地", "草地", "道路", "建筑物", "水体", "未利用地", "背景"]
-        #self.classes = ["背景", "耕地", "林地", "草地", "灌木林","湿地", "水体", "人造地表"]
 
         # create network
         self.model = get_segmentation_model().to(self.device)
@@ -71,7 +68,7 @@ class Evaluator(object):
 
         self.metric = SegmentationMetric(cfg.DATASET.NUM_CLASSES , args.distributed)
 
-        self.output_dir = os.path.join(cfg.VISUAL.OUTPUT_DIR,  'test_' + cfg.VISUAL.CURRENT_NAME)  #'vis_result_{}_{}_{}_{}'.format(cfg.MODEL.MODEL_NAME, cfg.MODEL.BACKBONE, cfg.DATASET.NAME, cfg.TIME_STAMP)
+        self.output_dir = os.path.join(cfg.VISUAL.OUTPUT_DIR,  'test_' + cfg.VISUAL.CURRENT_NAME)
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
 
@@ -139,24 +136,6 @@ class Evaluator(object):
         logging.info('Eval use time: {:.3f} second'.format(time.time() - time_start))
 
 
-    # def decode_segmap(self, mask):
-    #
-    #     assert len(mask.shape) == 2, "the len of mask unexpect"
-    #     assert cfg.DATASET.NUM_CLASSES == len(
-    #         cfg.DATASET.CLASS_INDEX), "the value of NUM_CLASSES do not equal the len of CLASS_INDEX"
-    #     height, width = mask.shape
-    #
-    #     if isinstance(cfg.DATASET.CLASS_INDEX[0], int):
-    #         decode_mask = np.zeros((height, width), dtype=np.uint)
-    #
-    #         for index, pixel in enumerate(cfg.DATASET.CLASS_INDEX):  # range(self.config.num_classes):
-    #             decode_mask[mask == index] = pixel
-    #     else:
-    #         decode_mask = np.zeros((height, width, 3), dtype=np.uint)
-    #         for index, pixel in enumerate(cfg.DATASET.CLASS_INDEX):  # range(self.config.num_classes):
-    #             decode_mask[mask == index] = pixel
-    #
-    #     return decode_mask.astype(np.uint8)
 
     def decode_segmap(self, mask):
 
@@ -176,7 +155,7 @@ if __name__ == '__main__':
     cfg.update_from_file(args.config_file)
     cfg.update_from_list(args.opts)
     cfg.PHASE = 'test'
-    #cfg.ROOT_PATH = r"/data_zs/data/data_cj_images" #r'/data_zs/data/test_crop'             #root_path
+
     cfg.check_and_freeze()
 
     default_setup(args)
