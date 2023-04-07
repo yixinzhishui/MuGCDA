@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="1622f535-a2c7-4605-b669-5cc3bf09552a" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="2O5d6pcIFX4DLOp2VzDaiQR4jU7" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="1622f535-a2c7-4605-b669-5cc3bf09552a" name="Default Changelist" comment="" />
+      <created>1680854203725</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1680854203725</updated>
+      <workItem from="1680854207123" duration="2315000" />
+    </task>
+    <task id="LOCAL-00001" summary="origin">
+      <created>1680856368470</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1680856368470</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="origin" />
+    <option name="LAST_COMMIT_MESSAGE" value="origin" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="2472" y="178" key="#Notifications" timestamp="1680856617519">
+      <screen x="1920" y="0" width="1920" height="1040" />
+    </state>
+    <state x="2472" y="178" key="#Notifications/0.0.1536.824/1920.0.1920.1040@1920.0.1920.1040" timestamp="1680856617519" />
+    <state x="2418" y="112" key="CommitChangelistDialog2" timestamp="1680856367778">
+      <screen x="1920" y="0" width="1920" height="1040" />
+    </state>
+    <state x="2418" y="112" key="CommitChangelistDialog2/0.0.1536.824/1920.0.1920.1040@1920.0.1920.1040" timestamp="1680856367778" />
+    <state x="2660" y="261" key="FileChooserDialogImpl" timestamp="1680854297508">
+      <screen x="1920" y="0" width="1920" height="1040" />
+    </state>
+    <state x="2660" y="261" key="FileChooserDialogImpl/0.0.1536.824/1920.0.1920.1040@1920.0.1920.1040" timestamp="1680854297508" />
+    <state x="2743" y="410" width="436" height="219" key="Github.ShareDialog" timestamp="1680854816893">
+      <screen x="1920" y="0" width="1920" height="1040" />
+    </state>
+    <state x="2743" y="410" width="436" height="219" key="Github.ShareDialog/0.0.1536.824/1920.0.1920.1040@1920.0.1920.1040" timestamp="1680854816893" />
+    <state x="2381" y="162" key="SettingsEditor" timestamp="1680854228395">
+      <screen x="1920" y="0" width="1920" height="1040" />
+    </state>
+    <state x="2381" y="162" key="SettingsEditor/0.0.1536.824/1920.0.1920.1040@1920.0.1920.1040" timestamp="1680854228395" />
+    <state x="2472" y="253" key="Vcs.Push.Dialog.v2" timestamp="1680856382962">
+      <screen x="1920" y="0" width="1920" height="1040" />
+    </state>
+    <state x="2472" y="253" key="Vcs.Push.Dialog.v2/0.0.1536.824/1920.0.1920.1040@1920.0.1920.1040" timestamp="1680856382962" />
+  </component>
+</project>
